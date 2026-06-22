@@ -42,7 +42,16 @@ Mahalath speaks N ✓"), so the two evolve on separate release cadences.
 - [x] Build the resolver + annotate seam: `tirzah/semantic.py` (`SemanticLabel`,
       `TermResolver`, `MahalathResolver` fail-soft, `annotate`/`render_prompt_block`),
       offline-tested. Tirzah `5e20593`.
-- [ ] Wire it into `build_prompt_envelope` (optional resolver param) + RuntimeConfig
-      flags (`mahalath_enabled`, `mahalath_mongo_uri/db`).
-- [ ] Surface resolved senses in Tirzah output ("interpreted as …").
-- [ ] Wire `workflows/semantic_smoke.py` A/B assertion (semantic on vs off).
+- [x] Wired into `build_prompt_envelope` (optional `resolver` + `semantic_strict`);
+      default off = byte-identical prompt. RuntimeConfig flags added
+      (`mahalath_enabled`, `mahalath_mongo_uri/db`, `mahalath_language`, `mahalath_strict`).
+      Both call sites pass it (`ask`/interaction + `build-prompt`).
+- [x] Senses surfaced: envelope `semantic` + `semantic_summary`; `build-prompt` prints
+      "interpreted as …" to stderr.
+- [x] `workflows/semantic_smoke.py` is a real A/B through Tirzah's `build_prompt_envelope`
+      — **PASS**: semantic-on names an MPL sense the off-run does not (uses live Mahalath
+      when populated, else a demo resolver so the contrast is always demonstrable).
+
+**MVP seam status: built + validated end-to-end.** Remaining for a full production
+MVP: seed/point at a populated Mahalath ontology so the *live* resolver returns labels
+(the demo proves the wiring); optional — surface the summary in `ask` human output too.
