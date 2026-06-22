@@ -23,13 +23,26 @@ annotate_with_mahalath(context_chunks) -> context_chunks + {term: (mpl_label, se
 - Avoid deep-importing Mahalath internals (it has no curated `__init__` facade yet);
   use the HTTP endpoint or a thin client.
 
+## Fuzzy search — already provided by Mahalath
+No separate fuzzy layer is needed. Mahalath's `search_terms` already combines a
+substring/word-boundary scorer with the `$text` stemmed index; `match_kind` reports
+strength: `label`/`exact`/`alias` (confident) vs `partial`/`text` (fuzzy). Because we
+attach a *precise sense*, the seam treats fuzzy hits carefully: `annotate(strict=True)`
+drops them, and otherwise they render as `(approx)` rather than being asserted as exact.
+
 ## Contract versioning
 Give the payload its own `contract_version`, independent of either tool's internal
 `schema_version`, plus a startup compatibility check ("Tirzah expects contract ≥ N,
 Mahalath speaks N ✓"), so the two evolve on separate release cadences.
 
 ## TODO
-- [ ] Document the exact `/api/retrieve` request/response payload as the v1 contract.
-- [ ] Add `annotate_with_mahalath()` + a call site in Tirzah retrieval.
+- [x] Resolver contract chosen: package-level `mahalath.retrieval.search_terms`
+      (returns MPL label + senses/frames + match_kind + is_stale; respects staleness,
+      so as safe as HTTP and needs no running web service).
+- [x] Build the resolver + annotate seam: `tirzah/semantic.py` (`SemanticLabel`,
+      `TermResolver`, `MahalathResolver` fail-soft, `annotate`/`render_prompt_block`),
+      offline-tested. Tirzah `5e20593`.
+- [ ] Wire it into `build_prompt_envelope` (optional resolver param) + RuntimeConfig
+      flags (`mahalath_enabled`, `mahalath_mongo_uri/db`).
 - [ ] Surface resolved senses in Tirzah output ("interpreted as …").
-- [ ] Wire `workflows/semantic_smoke.py` A/B assertion.
+- [ ] Wire `workflows/semantic_smoke.py` A/B assertion (semantic on vs off).
