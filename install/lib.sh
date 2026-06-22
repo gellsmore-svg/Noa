@@ -33,31 +33,52 @@ start_mongo() {
   echo " ready"
 }
 
-# Install each tool pinned in versions.lock via pipx, from its source path.
+# The lock file to install from. Defaults to versions.lock (local source paths);
+# override with VERSIONS_LOCK=versions.git.lock for a fresh machine (public git tags).
+versions_lock() {
+  echo "${VERSIONS_LOCK:-$1/versions.lock}"
+}
+
+# Build a pip/pipx install spec from a versions.lock source, which may be a local
+# path or a remote git/URL. `name` and optional `extra` are used for the PEP 508
+# "<name>[extra] @ <url>" form that remote sources need. Echoes nothing for a
+# missing local path (the caller skips).
+pip_spec() {
+  local name="$1" extra="$2" src="$3"
+  src="${src/#\~/$HOME}"
+  case "$src" in
+    git+*|http://*|https://*) printf '%s%s @ %s' "$name" "$extra" "$src" ;;
+    *) [ -e "$src" ] && printf '%s%s' "$src" "$extra" || return 1 ;;
+  esac
+}
+
+# Install each tool pinned in the lock file via pipx (local path OR git tag).
 # hoglah gets the [cli] extra (the `hoglah` command needs typer).
 install_pinned_tools() {
-  local root="$1" tool version path src spec
+  local root="$1" lock tool version src extra spec
   require_cmd pipx "Install it: python -m pip install --user pipx && pipx ensurepath"
-  while read -r tool version path; do
+  lock="$(versions_lock "$root")"
+  while read -r tool version src; do
     [ -z "$tool" ] && continue
     case "$tool" in \#*) continue ;; esac
-    src="${path/#\~/$HOME}"
-    [ -e "$src" ] || { warn "$tool: source path '$src' missing — skipping."; continue; }
-    spec="$src"; [ "$tool" = "hoglah" ] && spec="${src}[cli]"
+    extra=""; [ "$tool" = "hoglah" ] && extra="[cli]"
+    spec="$(pip_spec "$tool" "$extra" "$src")" \
+      || { warn "$tool: source '$src' missing — skipping."; continue; }
     info "$tool $version  <-  $src"
     pipx install --force "$spec" >/dev/null || die "pipx install $tool failed."
-  done < <(grep -vE '^\s*#|^\s*$' "$root/versions.lock")
+  done < <(grep -vE '^\s*#|^\s*$' "$lock")
 }
 
 # The semantic seam: Mahalath must be importable inside Tirzah's isolated pipx env.
 inject_mahalath_into_tirzah() {
-  local root="$1" src
+  local root="$1" lock raw spec
   pipx list 2>/dev/null | grep -q "package tirzah" || return 0
-  src="$(grep -E '^mahalath ' "$root/versions.lock" | awk '{print $3}')"
-  src="${src/#\~/$HOME}"
-  [ -e "$src" ] || { warn "mahalath path missing — skipping inject (set mahalath_enabled:false)."; return 0; }
+  lock="$(versions_lock "$root")"
+  raw="$(grep -E '^mahalath ' "$lock" | awk '{print $3}')"
+  spec="$(pip_spec "mahalath" "" "$raw")" \
+    || { warn "mahalath source missing — skipping inject (set mahalath_enabled:false)."; return 0; }
   info "inject mahalath into tirzah (semantic precision seam)"
-  pipx inject tirzah "$src" >/dev/null 2>&1 \
+  pipx inject tirzah "$spec" >/dev/null 2>&1 \
     || warn "mahalath inject failed — semantic precision will be a no-op until fixed."
 }
 

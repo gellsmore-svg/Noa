@@ -26,7 +26,7 @@ if [ "$NO_BACKUP" -eq 1 ]; then
   warn "--no-backup given — skipping the pre-upgrade backup."
 else
   mkdir -p "$BACKUP_DIR"
-  cp "$ROOT/versions.lock" "$BACKUP_DIR/versions.lock"
+  cp "$(versions_lock "$ROOT")" "$BACKUP_DIR/versions.lock"
   pipx list --short > "$BACKUP_DIR/pipx-versions.txt" 2>/dev/null || true
   # mongodump every DB into one gzipped archive (try the container, then the host).
   if ( cd "$ROOT" && docker compose exec -T mongo mongodump --archive --gzip ) \

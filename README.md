@@ -14,7 +14,9 @@ environment, separate from any dev checkout or virtualenv.
   the host, configured by URL; never containerised here).
 - `.env.example` — the single place you configure the stack (Ollama URL, Mongo, queue
   dir, version pins). Copy to `.env`.
-- `versions.lock` — the pinned, runtime-consumable versions of each sibling.
+- `versions.lock` — the pinned versions of each sibling (local source paths).
+  `versions.git.lock` pins the same versions to **public git tags** for a fresh
+  machine that can't see the local repos: `VERSIONS_LOCK=versions.git.lock ./install/install.sh`.
 - `install/` — `install.sh` (bring the stack up), `upgrade.sh` (backup → reinstall
   pinned → migrate → health, with rollback guidance), `lib.sh` (shared helpers).
 - `health/healthcheck.sh` — is Ollama reachable? Mongo up? queue writable? CLIs present?
