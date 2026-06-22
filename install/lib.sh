@@ -82,6 +82,25 @@ inject_mahalath_into_tirzah() {
     || warn "mahalath inject failed — semantic precision will be a no-op until fixed."
 }
 
+# Render the active Tirzah config from .env so the semantic seam is on by default
+# (feedback: a missing TIRZAH_CONFIG file silently disabled it). Won't clobber a
+# file the user has already edited.
+render_tirzah_config() {
+  local cfg="${TIRZAH_CONFIG:-}"
+  [ -n "$cfg" ] || return 0
+  if [ -f "$cfg" ]; then info "tirzah config exists ($cfg) — leaving as-is"; return 0; fi
+  mkdir -p "$(dirname "$cfg")"
+  cat > "$cfg" <<YAML
+# Rendered by Noa install from .env. Edit freely; install won't overwrite it.
+runtime:
+  mahalath_enabled: ${MAHALATH_ENABLED:-true}
+  mahalath_mongo_uri: ${MAHALATH_MONGO_URI:-mongodb://localhost:27017}
+  mahalath_mongo_db: ${MAHALATH_MONGO_DB:-mahalath_dev}
+  mahalath_strict: ${MAHALATH_STRICT:-true}
+YAML
+  info "wrote active tirzah config -> $cfg"
+}
+
 # Best-effort schema migrations on tools that expose a `migrate` command.
 run_migrations() {
   if command -v mahalath >/dev/null 2>&1 && mahalath --help 2>&1 | grep -q '\bmigrate\b'; then
