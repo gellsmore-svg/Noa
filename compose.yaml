@@ -1,0 +1,15 @@
+# Noa runtime — the one always-up stateful service.
+# Ollama is NOT here: it runs on the host (GPU + your models) and is reached by URL
+# (OLLAMA_BASE_URL). A Redis broker can be added later if the Hoglah SQLite queue
+# gets awkward with multiple submitters (see report §3).
+services:
+  mongo:
+    image: mongo:8.0
+    restart: unless-stopped
+    ports:
+      - "${MONGO_PORT:-27017}:27017"
+    volumes:
+      - mongo-data:/data/db
+
+volumes:
+  mongo-data:

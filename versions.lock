@@ -1,0 +1,10 @@
+# The pin contract: the runtime-consumable version of each sibling.
+# install.sh / upgrade.sh install exactly these. Bump a pin → run upgrade.sh.
+# Source today is the local repos under ~/domains; switch the install source to
+# git tags or PyPI once releases are published (see install.sh).
+#
+# tool      version   repo
+mahalath    1.1.0     ~/domains/Mahalath
+tirzah      1.2.0     ~/domains/Tirzah
+hoglah      0.7.0     ~/domains/Hoglah
+# milcah    deferred  ~/domains/Milcah   # pre-prod; add when FR10 persistence lands
