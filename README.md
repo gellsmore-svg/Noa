@@ -15,7 +15,8 @@ environment, separate from any dev checkout or virtualenv.
 - `.env.example` — the single place you configure the stack (Ollama URL, Mongo, queue
   dir, version pins). Copy to `.env`.
 - `versions.lock` — the pinned, runtime-consumable versions of each sibling.
-- `install/` — `install.sh` (bring the stack up), `upgrade.sh`/`uninstall.sh` (later).
+- `install/` — `install.sh` (bring the stack up), `upgrade.sh` (backup → reinstall
+  pinned → migrate → health, with rollback guidance), `lib.sh` (shared helpers).
 - `health/healthcheck.sh` — is Ollama reachable? Mongo up? queue writable? CLIs present?
 - `config/` — per-tool config templates, rendered from `.env`.
 - `workflows/semantic_smoke.py` — the end-to-end MVP proof (needs the Tirzah→Mahalath
@@ -26,9 +27,12 @@ environment, separate from any dev checkout or virtualenv.
 ## Quick start (target state)
 ```bash
 cp .env.example .env          # set OLLAMA_BASE_URL, MONGO_URI, …
-docker compose up -d mongo    # the one persistent service
-./install/install.sh          # pipx-install the pinned tools, render configs
-./health/healthcheck.sh       # confirm the stack is live
+./install/install.sh          # mongo up + pipx-install pinned tools + health
+./health/healthcheck.sh       # confirm the stack is live (also run by install.sh)
+```
+Upgrades (after bumping `versions.lock`):
+```bash
+./install/upgrade.sh          # backup → reinstall pinned → migrate → health
 ```
 
 ## Status
