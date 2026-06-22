@@ -47,7 +47,8 @@ Mahalath speaks N ✓"), so the two evolve on separate release cadences.
       (`mahalath_enabled`, `mahalath_mongo_uri/db`, `mahalath_language`, `mahalath_strict`).
       Both call sites pass it (`ask`/interaction + `build-prompt`).
 - [x] Senses surfaced: envelope `semantic` + `semantic_summary`; `build-prompt` prints
-      "interpreted as …" to stderr.
+      "interpreted as …" to stderr; the **`ask` human output** prints the
+      "[interpreted as: term→MPL-xxx (sense)]" line under the answer (Tirzah `07657be`).
 - [x] `workflows/semantic_smoke.py` is a real A/B through Tirzah's `build_prompt_envelope`
       — **PASS**: semantic-on names an MPL sense the off-run does not (uses live Mahalath
       when populated, else a demo resolver so the contrast is always demonstrable).
@@ -67,6 +68,11 @@ a shared venv that's automatic; under pipx isolation the stack must co-install �
 extra. (Alternative, no co-install: switch the resolver to Mahalath's HTTP
 `/api/retrieve` — future option.)
 
-**MVP seam status: built + validated end-to-end against live labels.** Optional
-follow-ups: surface the summary in `ask` human output; richer term extraction; the
-HTTP-resolver variant.
+## Stage 4: DONE (2026-06-22)
+The Tirzah→Mahalath seam is **built, live-validated, and surfaced** — precision is
+used (conditions the prompt) and shown (in `ask` output), meeting the report's MVP
+criterion ("output shows semantic precision was actually used, not merely stored").
+
+Deferred (genuinely optional, not blocking): richer term extraction; the HTTP
+`/api/retrieve` resolver variant (removes the co-install requirement); growing the
+seeded ontology into a real corpus.

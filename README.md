@@ -32,10 +32,13 @@ docker compose up -d mongo    # the one persistent service
 ```
 
 ## Status
-**Early scaffold (2026-06-22).** Mahalath/Tirzah are Stage-2 stabilised (portable
-Ollama config + env overrides). The minimum-viable stack is Mahalath + Tirzah +
-Hoglah; Milcah is deferred. See the report's §6–§7 for what "done" means and the
-staged plan to get there.
+**2026-06-22.** Stage 2 (stabilise) and Stage 4 (the Tirzah→Mahalath semantic seam)
+are **done**: Mahalath/Tirzah have portable Ollama config + env overrides, and
+retrieval resolves key terms to live MPL labels/senses that condition *and* annotate
+the answer (`workflows/semantic_smoke.py` passes on live labels; see
+[integration.md](docs/integration.md)). The minimum-viable stack is Mahalath +
+Tirzah + Hoglah; Milcah is deferred. Remaining: package/orchestration polish
+(install.sh, upgrade/backup), then change-control (report §5, §7 stages 3/5/6).
 
 ## Hard rule
 Noa **orchestrates, it does not vendor.** It pins *released* versions of the siblings
