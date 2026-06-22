@@ -21,8 +21,10 @@ environment, separate from any dev checkout or virtualenv.
   pinned → migrate → health, with rollback guidance), `lib.sh` (shared helpers).
 - `health/healthcheck.sh` — is Ollama reachable? Mongo up? queue writable? CLIs present?
 - `config/` — per-tool config templates, rendered from `.env`.
-- `workflows/semantic_smoke.py` — the end-to-end MVP proof (needs the Tirzah→Mahalath
-  seam from Stage 4; currently a stub).
+- `workflows/ingest_document.sh <file>` — **integrated ingestion**: Mahalath ingests
+  + extracts the document's MPL terms first, then Tirzah ingests the same document, so
+  retrieval resolves against those terms.
+- `workflows/semantic_smoke.py` — the end-to-end seam proof (A/B; passes on live labels).
 - `docs/` — the **[readiness & integration report](docs/STACK-READINESS-REPORT.md)**
   (the full plan), plus runtime/change-management notes.
 
