@@ -93,12 +93,49 @@ render_tirzah_config() {
   cat > "$cfg" <<YAML
 # Rendered by Noa install from .env. Edit freely; install won't overwrite it.
 runtime:
+  # Real LLM + embeddings through the Hoglah worker daemon (Noa default).
+  model_adapter: hoglah
+  answer_adapter: hoglah
+  embedding_adapter: hoglah
+  embedding_model: ${EMBEDDING_MODEL:-bge-m3:latest}
+  embedding_dimensions: ${EMBEDDING_DIMENSIONS:-1024}
+  hoglah_db_path: ${HOGLAH_DB_PATH:-$HOME/.hoglah/hoglah.db}
+  hoglah_output_dir: ${HOGLAH_OUTPUT_DIR:-$HOME/.hoglah/outbox}
+  hoglah_ollama_host: ${HOGLAH_OLLAMA_HOST:-http://localhost:11434}
+  # Semantic precision seam (Tirzah -> Mahalath).
   mahalath_enabled: ${MAHALATH_ENABLED:-true}
   mahalath_mongo_uri: ${MAHALATH_MONGO_URI:-mongodb://localhost:27017}
   mahalath_mongo_db: ${MAHALATH_MONGO_DB:-mahalath_dev}
   mahalath_strict: ${MAHALATH_STRICT:-true}
 YAML
   info "wrote active tirzah config -> $cfg"
+}
+
+# Start a Hoglah worker daemon (the executor behind the hoglah adapters). Idempotent:
+# if a worker is already running against this queue, leave it. PID + log under the
+# queue dir. The daemon reads HOGLAH_DB_PATH / HOGLAH_OUTPUT_DIR / HOGLAH_OLLAMA_HOST
+# / HOGLAH_CONCURRENCY from the env (pydantic-settings, prefix HOGLAH_).
+start_hoglah_worker() {
+  local qdir="${HOGLAH_QUEUE_DIR:-$HOME/.hoglah}" pidfile logfile
+  command -v hoglah >/dev/null 2>&1 || { warn "hoglah CLI not on PATH — cannot start the worker."; return 0; }
+  mkdir -p "$qdir"
+  pidfile="$qdir/worker.pid"; logfile="$qdir/worker.log"
+  if [ -f "$pidfile" ] && kill -0 "$(cat "$pidfile" 2>/dev/null)" 2>/dev/null; then
+    info "hoglah worker already running (pid $(cat "$pidfile"))"; return 0
+  fi
+  info "starting hoglah worker -> $logfile"
+  HOGLAH_DB_PATH="${HOGLAH_DB_PATH:-$qdir/hoglah.db}" \
+  HOGLAH_OUTPUT_DIR="${HOGLAH_OUTPUT_DIR:-$qdir/outbox}" \
+  HOGLAH_OLLAMA_HOST="${HOGLAH_OLLAMA_HOST:-http://localhost:11434}" \
+  HOGLAH_CONCURRENCY="${HOGLAH_CONCURRENCY:-1}" \
+    setsid hoglah run --real >"$logfile" 2>&1 &
+  echo $! > "$pidfile"
+  sleep 2
+  if kill -0 "$(cat "$pidfile")" 2>/dev/null; then
+    info "hoglah worker up (pid $(cat "$pidfile"))"
+  else
+    warn "hoglah worker exited immediately — see $logfile"
+  fi
 }
 
 # Best-effort schema migrations on tools that expose a `migrate` command.

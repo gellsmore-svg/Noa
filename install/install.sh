@@ -27,8 +27,9 @@ start_mongo "$ROOT"
 log "2/4  Tools (pipx, from versions.lock)"
 install_pinned_tools "$ROOT"
 
-# --- 3/4 semantic seam co-install + active config --------------------------
-log "3/4  Semantic precision (Tirzah <- Mahalath)"
+# --- 3/4 worker + adapters + active config ---------------------------------
+log "3/4  Real adapters (Hoglah worker + Tirzah<-Mahalath seam)"
+start_hoglah_worker
 inject_mahalath_into_tirzah "$ROOT"
 render_tirzah_config
 

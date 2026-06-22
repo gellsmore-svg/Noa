@@ -37,6 +37,14 @@ else
   bad "hoglah queue dir not writable ($HOGLAH_QUEUE_DIR)"
 fi
 
+# Hoglah worker daemon (executes the model/embedding jobs)
+WPID="$HOGLAH_QUEUE_DIR/worker.pid"
+if [ -f "$WPID" ] && kill -0 "$(cat "$WPID" 2>/dev/null)" 2>/dev/null; then
+  ok "hoglah worker running (pid $(cat "$WPID"))"
+else
+  bad "hoglah worker not running (run ./install/install.sh, or see $HOGLAH_QUEUE_DIR/worker.log)"
+fi
+
 # CLIs on PATH
 for tool in mahalath tirzah hoglah; do
   if command -v "$tool" >/dev/null 2>&1; then
