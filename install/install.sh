@@ -25,6 +25,15 @@ grep -vE '^\s*#|^\s*$' versions.lock | while read -r tool version path; do
   pipx install --force "$repo" >/dev/null
 done
 
+# Semantic precision: the package-level resolver needs Mahalath importable in
+# Tirzah's (isolated) pipx env. Co-install it so `mahalath_enabled: true` works.
+if command -v pipx >/dev/null 2>&1 && pipx list 2>/dev/null | grep -q tirzah; then
+  echo "==> inject mahalath into tirzah (semantic seam)"
+  mahalath_src="$(grep -E '^mahalath ' versions.lock | awk '{print $3}')"
+  pipx inject tirzah "${mahalath_src/#\~/$HOME}" >/dev/null 2>&1 || \
+    echo "    (skipped — inject failed; set mahalath_enabled:false or fix the path)"
+fi
+
 echo "==> 3/3  Health"
 "$ROOT/health/healthcheck.sh" || {
   echo "Healthcheck reported problems — see above." >&2; exit 1; }

@@ -52,6 +52,21 @@ Mahalath speaks N ✓"), so the two evolve on separate release cadences.
       — **PASS**: semantic-on names an MPL sense the off-run does not (uses live Mahalath
       when populated, else a demo resolver so the contrast is always demonstrable).
 
-**MVP seam status: built + validated end-to-end.** Remaining for a full production
-MVP: seed/point at a populated Mahalath ontology so the *live* resolver returns labels
-(the demo proves the wiring); optional — surface the summary in `ask` human output too.
+## Validated end-to-end against LIVE Mahalath (2026-06-22)
+Seeded a tiny demo ontology (`workflows/seed_mahalath_demo.py`: `form`/`substrate`/
+`vorton` with polysemous senses) into `mahalath_dev`, then ran the smoke in an env
+with **both** tirzah + mahalath installed (from wheels): `semantic_smoke.py` →
+**PASS, label source = "live Mahalath ontology"**, `form → MPL-901 (logical)` in the
+on-run, absent in the off-run. The full path works: Tirzah retrieval → Mahalath
+`search_terms` → MPL label+sense in the prompt.
+
+### Co-install requirement (important)
+The package-level resolver needs Mahalath **importable in Tirzah's environment**. In
+a shared venv that's automatic; under pipx isolation the stack must co-install —
+`install.sh` runs `pipx inject tirzah <mahalath>`, and Tirzah declares a `mahalath`
+extra. (Alternative, no co-install: switch the resolver to Mahalath's HTTP
+`/api/retrieve` — future option.)
+
+**MVP seam status: built + validated end-to-end against live labels.** Optional
+follow-ups: surface the summary in `ask` human output; richer term extraction; the
+HTTP-resolver variant.
