@@ -3,6 +3,8 @@
 set -uo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+# Normalise HOME first (runuser/su can reset it) so ${HOME}/... in .env resolves right.
+. "$ROOT/install/lib.sh"; normalize_home
 [ -f "$ROOT/.env" ] && set -a && . "$ROOT/.env" && set +a
 
 OLLAMA_BASE_URL="${OLLAMA_BASE_URL:-http://localhost:11434}"

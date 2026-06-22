@@ -9,9 +9,24 @@ die()  { printf '\033[31mError:\033[0m %s\n' "$*" >&2; exit 1; }
 # Resolve the repo root (one level up from install/).
 noa_root() { cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd; }
 
-# Require .env, then export every variable in it.
+# runuser/su (especially with a login shell) can drop or reset HOME, so `${HOME}`
+# inside .env then expands to a bad path at source time. Re-derive the invoking
+# user's real home from the passwd database before anything reads HOME.
+normalize_home() {
+  local realhome
+  realhome="$(getent passwd "$(id -un)" 2>/dev/null | cut -d: -f6)"
+  [ -n "$realhome" ] && [ -d "$realhome" ] || return 0
+  if [ "${HOME:-}" != "$realhome" ]; then
+    [ -n "${HOME:-}" ] && warn "HOME='${HOME}' != passwd home '$realhome' — using '$realhome' (runuser/su can reset HOME)."
+    export HOME="$realhome"
+  fi
+}
+
+# Require .env, then export every variable in it (with HOME normalised first so
+# ${HOME}/... values resolve correctly).
 load_env() {
   local root="$1"
+  normalize_home
   [ -f "$root/.env" ] || die "No .env found — copy .env.example to .env and edit it first."
   set -a; . "$root/.env"; set +a
 }

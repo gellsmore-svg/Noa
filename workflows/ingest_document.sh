@@ -10,6 +10,7 @@
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+. "$ROOT/install/lib.sh"; normalize_home   # runuser/su can reset HOME before .env expands
 [ -f "$ROOT/.env" ] && { set -a; . "$ROOT/.env"; set +a; }
 
 FILE="${1:-}"
