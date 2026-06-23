@@ -19,6 +19,10 @@ environment, separate from any dev checkout or virtualenv.
   machine that can't see the local repos: `VERSIONS_LOCK=versions.git.lock ./install/install.sh`.
 - `install/` — `install.sh` (bring the stack up), `upgrade.sh` (backup → reinstall
   pinned → migrate → health, with rollback guidance), `lib.sh` (shared helpers).
+- `services/hoglah-worker.service` — systemd **user** unit for the Hoglah worker.
+  install.sh runs the worker as a durable systemd service on native Linux (auto-
+  restart, survives logout via linger) and falls back to a background process on
+  WSL / no-systemd.
 - `health/healthcheck.sh` — is Ollama reachable? Mongo up? queue writable? CLIs present?
 - `config/` — per-tool config templates, rendered from `.env`.
 - `workflows/ingest_document.sh <file>` — **integrated ingestion**: Mahalath ingests

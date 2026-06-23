@@ -1,0 +1,21 @@
+# Hoglah worker — systemd USER service template.
+# install.sh renders this into ~/.config/systemd/user/hoglah-worker.service,
+# substituting @HOGLAH@ (resolved `hoglah` path) and @ENVFILE@ (rendered from .env).
+# Manual install:
+#   systemctl --user daemon-reload
+#   systemctl --user enable --now hoglah-worker.service
+#   loginctl enable-linger "$USER"     # survive logout/reboot
+[Unit]
+Description=Hoglah worker (Noa runtime — executes LLM/embedding jobs)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+EnvironmentFile=@ENVFILE@
+ExecStart=@HOGLAH@ run --real
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=default.target

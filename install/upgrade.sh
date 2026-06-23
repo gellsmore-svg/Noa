@@ -47,6 +47,7 @@ fi
 log "2/4  Reinstall pinned tools"
 install_pinned_tools "$ROOT"
 inject_mahalath_into_tirzah "$ROOT"
+restart_hoglah_worker   # pick up the upgraded hoglah code
 
 # --- 3/4 migrations --------------------------------------------------------
 log "3/4  Migrations"

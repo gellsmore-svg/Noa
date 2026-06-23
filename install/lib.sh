@@ -1,6 +1,9 @@
 #!/usr/bin/env bash
 # Shared helpers for Noa's install/upgrade scripts. Sourced, not run.
 
+# Repo root, resolved from this file's location (so helpers can find services/).
+NOA_LIB_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+
 log()  { printf '\033[1m==>\033[0m %s\n' "$*"; }
 info() { printf '    %s\n' "$*"; }
 warn() { printf '\033[33m    warn:\033[0m %s\n' "$*" >&2; }
@@ -126,15 +129,45 @@ YAML
   info "wrote active tirzah config -> $cfg"
 }
 
-# Start a Hoglah worker daemon (the executor behind the hoglah adapters). Idempotent:
-# if a worker is already running against this queue, leave it. PID + log under the
-# queue dir. The daemon reads HOGLAH_DB_PATH / HOGLAH_OUTPUT_DIR / HOGLAH_OLLAMA_HOST
-# / HOGLAH_CONCURRENCY from the env (pydantic-settings, prefix HOGLAH_).
-start_hoglah_worker() {
-  local qdir="${HOGLAH_QUEUE_DIR:-$HOME/.hoglah}" pidfile logfile
-  command -v hoglah >/dev/null 2>&1 || { warn "hoglah CLI not on PATH — cannot start the worker."; return 0; }
-  mkdir -p "$qdir"
-  pidfile="$qdir/worker.pid"; logfile="$qdir/worker.log"
+# Is a usable systemd USER instance available (native Linux), vs not (WSL, no systemd)?
+_systemd_user_available() {
+  command -v systemctl >/dev/null 2>&1 || return 1
+  systemctl --user show-environment >/dev/null 2>&1
+}
+
+# Render the worker env file the unit reads (HOGLAH_* from .env, with defaults).
+_render_worker_envfile() {
+  local qdir="$1" envfile="$1/worker.env"
+  cat > "$envfile" <<EOF
+HOGLAH_DB_PATH=${HOGLAH_DB_PATH:-$qdir/hoglah.db}
+HOGLAH_OUTPUT_DIR=${HOGLAH_OUTPUT_DIR:-$qdir/outbox}
+HOGLAH_OLLAMA_HOST=${HOGLAH_OLLAMA_HOST:-http://localhost:11434}
+HOGLAH_CONCURRENCY=${HOGLAH_CONCURRENCY:-1}
+EOF
+  echo "$envfile"
+}
+
+# Native Linux: run the worker as a systemd user service (durable, auto-restart,
+# survives logout with linger). Returns non-zero so the caller can fall back.
+_start_worker_systemd() {
+  local qdir="$1" template="$NOA_LIB_ROOT/services/hoglah-worker.service"
+  local unitdir="$HOME/.config/systemd/user" envfile hoglah_bin
+  [ -f "$template" ] || return 1
+  hoglah_bin="$(command -v hoglah)" || return 1
+  mkdir -p "$unitdir"
+  envfile="$(_render_worker_envfile "$qdir")"
+  sed -e "s#@ENVFILE@#$envfile#" -e "s#@HOGLAH@#$hoglah_bin#" "$template" \
+    > "$unitdir/hoglah-worker.service" || return 1
+  systemctl --user daemon-reload || return 1
+  systemctl --user enable --now hoglah-worker.service >/dev/null 2>&1 || return 1
+  loginctl enable-linger "$(id -un)" >/dev/null 2>&1 \
+    || warn "could not enable linger — worker won't survive logout. Run: loginctl enable-linger $(id -un)"
+  info "hoglah worker running as a systemd user service (systemctl --user status hoglah-worker)"
+}
+
+# Fallback (WSL / no systemd): a backgrounded process with a PID file + log.
+_start_worker_setsid() {
+  local qdir="$1" pidfile="$1/worker.pid" logfile="$1/worker.log"
   if [ -f "$pidfile" ] && kill -0 "$(cat "$pidfile" 2>/dev/null)" 2>/dev/null; then
     info "hoglah worker already running (pid $(cat "$pidfile"))"; return 0
   fi
@@ -146,11 +179,34 @@ start_hoglah_worker() {
     setsid hoglah run --real >"$logfile" 2>&1 &
   echo $! > "$pidfile"
   sleep 2
-  if kill -0 "$(cat "$pidfile")" 2>/dev/null; then
-    info "hoglah worker up (pid $(cat "$pidfile"))"
-  else
-    warn "hoglah worker exited immediately — see $logfile"
+  kill -0 "$(cat "$pidfile")" 2>/dev/null \
+    && info "hoglah worker up (pid $(cat "$pidfile"))" \
+    || warn "hoglah worker exited immediately — see $logfile"
+}
+
+# Start the Hoglah worker (the executor behind the hoglah adapters). Prefers a
+# systemd user service on native Linux; falls back to a background process on
+# WSL / no-systemd. Idempotent.
+start_hoglah_worker() {
+  local qdir="${HOGLAH_QUEUE_DIR:-$HOME/.hoglah}"
+  command -v hoglah >/dev/null 2>&1 || { warn "hoglah CLI not on PATH — cannot start the worker."; return 0; }
+  mkdir -p "$qdir"
+  if _systemd_user_available && _start_worker_systemd "$qdir"; then
+    return 0
   fi
+  _systemd_user_available && warn "systemd user setup failed — using a background process."
+  _start_worker_setsid "$qdir"
+}
+
+# Restart the worker to pick up upgraded code (systemd service or setsid process).
+restart_hoglah_worker() {
+  local qdir="${HOGLAH_QUEUE_DIR:-$HOME/.hoglah}" pidfile
+  if _systemd_user_available && systemctl --user cat hoglah-worker.service >/dev/null 2>&1; then
+    systemctl --user restart hoglah-worker.service && { info "restarted hoglah worker (systemd)"; return 0; }
+  fi
+  pidfile="$qdir/worker.pid"
+  [ -f "$pidfile" ] && kill "$(cat "$pidfile" 2>/dev/null)" 2>/dev/null && rm -f "$pidfile"
+  start_hoglah_worker
 }
 
 # Best-effort schema migrations on tools that expose a `migrate` command.

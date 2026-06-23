@@ -39,9 +39,11 @@ else
   bad "hoglah queue dir not writable ($HOGLAH_QUEUE_DIR)"
 fi
 
-# Hoglah worker daemon (executes the model/embedding jobs)
+# Hoglah worker (systemd user service on native Linux, else a background process)
 WPID="$HOGLAH_QUEUE_DIR/worker.pid"
-if [ -f "$WPID" ] && kill -0 "$(cat "$WPID" 2>/dev/null)" 2>/dev/null; then
+if systemctl --user is-active hoglah-worker.service >/dev/null 2>&1; then
+  ok "hoglah worker running (systemd user service)"
+elif [ -f "$WPID" ] && kill -0 "$(cat "$WPID" 2>/dev/null)" 2>/dev/null; then
   ok "hoglah worker running (pid $(cat "$WPID"))"
 else
   bad "hoglah worker not running (run ./install/install.sh, or see $HOGLAH_QUEUE_DIR/worker.log)"
