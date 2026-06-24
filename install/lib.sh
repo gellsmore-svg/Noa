@@ -73,7 +73,7 @@ pip_spec() {
 # Install each tool pinned in the lock file via pipx (local path OR git tag).
 # hoglah gets the [cli] extra (the `hoglah` command needs typer).
 install_pinned_tools() {
-  local root="$1" lock tool version src extra spec
+  local root="$1" lock tool version src extra spec installed
   require_cmd pipx "Install it: python -m pip install --user pipx && pipx ensurepath"
   lock="$(versions_lock "$root")"
   while read -r tool version src; do
@@ -84,6 +84,9 @@ install_pinned_tools() {
       || { warn "$tool: source '$src' missing — skipping."; continue; }
     info "$tool $version  <-  $src"
     pipx install --force "$spec" >/dev/null || die "pipx install $tool failed."
+    installed="$(pipx runpip "$tool" show "$tool" 2>/dev/null | awk -F ": " '$1 == "Version" { print $2; exit }')"
+    [ "$installed" = "$version" ] \
+      || die "$tool version mismatch: lock requires $version, installed ${installed:-unknown}."
   done < <(grep -vE '^\s*#|^\s*$' "$lock")
 }
 
