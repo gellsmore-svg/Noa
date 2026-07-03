@@ -56,3 +56,7 @@ Tirzah + Hoglah; Milcah is deferred. Remaining: package/orchestration polish
 Noa **orchestrates, it does not vendor.** It pins *released* versions of the siblings
 and installs them; it never copies their code. Contents stay limited to compose +
 config templates + scripts + docs.
+
+## LLM access
+Products submit LLM inference **through Hoglah**; direct Ollama adapters are
+standalone/dev fallbacks only. See [llm-access-policy.md](docs/llm-access-policy.md).
