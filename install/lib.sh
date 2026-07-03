@@ -79,6 +79,9 @@ install_pinned_tools() {
   while read -r tool version src; do
     [ -z "$tool" ] && continue
     case "$tool" in \#*) continue ;; esac
+    # galeed is a library (no console app) — pipx can't install it; it is
+    # injected into each tool's env by inject_galeed instead.
+    [ "$tool" = "galeed" ] && continue
     extra=""; [ "$tool" = "hoglah" ] && extra="[cli]"
     spec="$(pip_spec "$tool" "$extra" "$src")" \
       || { warn "$tool: source '$src' missing — skipping."; continue; }
@@ -101,6 +104,28 @@ inject_mahalath_into_tirzah() {
   info "inject mahalath into tirzah (semantic precision seam)"
   pipx inject tirzah "$spec" >/dev/null 2>&1 \
     || warn "mahalath inject failed — semantic precision will be a no-op until fixed."
+}
+
+# The trace spine: galeed is a library (not on PyPI, no console app), so it is
+# injected into each tool's isolated pipx env from the lock source. Hoglah also
+# gets pymongo (its core is Mongo-free) so job events persist rather than being
+# bus-only. Emission itself is toggled by the *_GALEED_ENABLED flags in .env.
+inject_galeed() {
+  local root="$1" lock raw spec tool
+  lock="$(versions_lock "$root")"
+  raw="$(grep -E '^galeed ' "$lock" | awk '{print $3}')"
+  spec="$(pip_spec "galeed" "" "$raw")" \
+    || { warn "galeed source missing — trace-spine emission stays a no-op."; return 0; }
+  for tool in hoglah mahalath tirzah; do
+    pipx list 2>/dev/null | grep -q "package $tool" || continue
+    info "inject galeed into $tool (family trace spine)"
+    pipx inject "$tool" "$spec" >/dev/null 2>&1 \
+      || warn "galeed inject into $tool failed — its spine emission will no-op."
+  done
+  if pipx list 2>/dev/null | grep -q "package hoglah"; then
+    pipx inject hoglah "pymongo>=4.6" >/dev/null 2>&1 \
+      || warn "pymongo inject into hoglah failed — job events will be bus-only."
+  fi
 }
 
 # Render the active Tirzah config from .env so the semantic seam is on by default
@@ -146,6 +171,9 @@ HOGLAH_DB_PATH=${HOGLAH_DB_PATH:-$qdir/hoglah.db}
 HOGLAH_OUTPUT_DIR=${HOGLAH_OUTPUT_DIR:-$qdir/outbox}
 HOGLAH_OLLAMA_HOST=${HOGLAH_OLLAMA_HOST:-http://localhost:11434}
 HOGLAH_CONCURRENCY=${HOGLAH_CONCURRENCY:-1}
+HOGLAH_GALEED_ENABLED=${HOGLAH_GALEED_ENABLED:-true}
+HOGLAH_GALEED_MONGO_URI=${HOGLAH_GALEED_MONGO_URI:-mongodb://localhost:27017}
+HOGLAH_GALEED_MONGO_DB=${HOGLAH_GALEED_MONGO_DB:-mnemosyne_dev}
 EOF
   echo "$envfile"
 }
@@ -179,6 +207,9 @@ _start_worker_setsid() {
   HOGLAH_OUTPUT_DIR="${HOGLAH_OUTPUT_DIR:-$qdir/outbox}" \
   HOGLAH_OLLAMA_HOST="${HOGLAH_OLLAMA_HOST:-http://localhost:11434}" \
   HOGLAH_CONCURRENCY="${HOGLAH_CONCURRENCY:-1}" \
+  HOGLAH_GALEED_ENABLED="${HOGLAH_GALEED_ENABLED:-true}" \
+  HOGLAH_GALEED_MONGO_URI="${HOGLAH_GALEED_MONGO_URI:-mongodb://localhost:27017}" \
+  HOGLAH_GALEED_MONGO_DB="${HOGLAH_GALEED_MONGO_DB:-mnemosyne_dev}" \
     setsid hoglah run --real >"$logfile" 2>&1 &
   echo $! > "$pidfile"
   sleep 2
@@ -205,6 +236,8 @@ start_hoglah_worker() {
 restart_hoglah_worker() {
   local qdir="${HOGLAH_QUEUE_DIR:-$HOME/.hoglah}" pidfile
   if _systemd_user_available && systemctl --user cat hoglah-worker.service >/dev/null 2>&1; then
+    mkdir -p "$qdir"
+    _render_worker_envfile "$qdir" >/dev/null   # pick up new/changed env keys
     systemctl --user restart hoglah-worker.service && { info "restarted hoglah worker (systemd)"; return 0; }
   fi
   pidfile="$qdir/worker.pid"

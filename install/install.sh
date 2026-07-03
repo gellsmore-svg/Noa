@@ -28,7 +28,8 @@ log "2/4  Tools (pipx, from versions.lock)"
 install_pinned_tools "$ROOT"
 
 # --- 3/4 worker + adapters + active config ---------------------------------
-log "3/4  Real adapters (Hoglah worker + Tirzah<-Mahalath seam)"
+log "3/4  Real adapters (Hoglah worker + Tirzah<-Mahalath seam + Galeed spine)"
+inject_galeed "$ROOT"
 start_hoglah_worker
 inject_mahalath_into_tirzah "$ROOT"
 render_tirzah_config
