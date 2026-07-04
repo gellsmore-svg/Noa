@@ -41,6 +41,12 @@ require_cmd() {
 # Bring Mongo up and wait until it answers ping (default 60s).
 start_mongo() {
   local root="$1" timeout="${2:-60}" waited=0
+  local uri="${MONGO_URI:-mongodb://localhost:${MONGO_PORT:-27017}}"
+  if command -v mongosh >/dev/null 2>&1 \
+      && mongosh "$uri" --quiet --eval 'db.runCommand({ping:1}).ok' >/dev/null 2>&1; then
+    info "mongo already responds at $uri"
+    return 0
+  fi
   ( cd "$root" && docker compose up -d mongo ) || die "docker compose up mongo failed."
   printf '    waiting for mongo'
   until ( cd "$root" && docker compose exec -T mongo mongosh --quiet \
@@ -138,7 +144,7 @@ install_pinned_tools() {
     info "$tool $version  <-  $src"
     pipx install --force "${pip_args[@]}" "$spec" >/dev/null \
       || die "pipx install $tool failed."
-    installed="$(pipx runpip "$tool" show "$tool" 2>/dev/null | awk -F ": " '$1 == "Version" { print $2; exit }')"
+    installed="$(pipx runpip "$tool" show "$tool" 2>/dev/null | awk -F ": " '$1 == "Version" && !seen { print $2; seen=1 }')"
     [ "$installed" = "$version" ] \
       || die "$tool version mismatch: lock requires $version, installed ${installed:-unknown}."
   done < <(grep -vE '^\s*#|^\s*$' "$lock")
