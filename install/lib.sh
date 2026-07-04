@@ -70,23 +70,45 @@ pip_spec() {
   esac
 }
 
+# Family libraries: tool dependencies with no console apps that are NOT on
+# PyPI (and 'cairn' on PyPI is an unrelated project). They are --preinstall-ed
+# into each tool's venv from the lock, which both lets pip resolve them and
+# pins the right package instead of a PyPI name-collision.
+FAMILY_LIBS="galeed keturah cairn"
+
+_is_family_lib() { case " $FAMILY_LIBS " in *" $1 "*) return 0 ;; *) return 1 ;; esac; }
+
 # Install each tool pinned in the lock file via pipx (local path OR git tag).
-# hoglah gets the [cli] extra (the `hoglah` command needs typer).
+# hoglah gets the [cli] extra (the `hoglah` command needs typer). Family
+# libraries from the lock are preinstalled into every tool's venv (see above);
+# needs pipx with --preinstall (>= 1.3).
 install_pinned_tools() {
   local root="$1" lock tool version src extra spec installed
+  local preinstall=()
   require_cmd pipx "Install it: python -m pip install --user pipx && pipx ensurepath"
+  pipx install --help 2>/dev/null | grep -q -- --preinstall \
+    || die "pipx with --preinstall support (>= 1.3) is required; found $(pipx --version 2>/dev/null || echo unknown)."
   lock="$(versions_lock "$root")"
+
+  # Pass 1: collect the family libraries as --preinstall flags.
   while read -r tool version src; do
-    [ -z "$tool" ] && continue
-    case "$tool" in \#*) continue ;; esac
-    # galeed is a library (no console app) — pipx can't install it; it is
-    # injected into each tool's env by inject_galeed instead.
-    [ "$tool" = "galeed" ] && continue
+    _is_family_lib "$tool" || continue
+    spec="$(pip_spec "$tool" "" "$src")" \
+      || { warn "$tool: source '$src' missing — tools depending on it may not resolve."; continue; }
+    preinstall+=(--preinstall "$spec")
+  done < <(grep -vE '^\s*#|^\s*$' "$lock")
+  [ ${#preinstall[@]} -gt 0 ] \
+    || warn "no family libraries in the lock — fresh installs may fail to resolve galeed/keturah/cairn."
+
+  # Pass 2: install the app tools.
+  while read -r tool version src; do
+    _is_family_lib "$tool" && continue
     extra=""; [ "$tool" = "hoglah" ] && extra="[cli]"
     spec="$(pip_spec "$tool" "$extra" "$src")" \
       || { warn "$tool: source '$src' missing — skipping."; continue; }
     info "$tool $version  <-  $src"
-    pipx install --force "$spec" >/dev/null || die "pipx install $tool failed."
+    pipx install --force ${preinstall[@]+"${preinstall[@]}"} "$spec" >/dev/null \
+      || die "pipx install $tool failed."
     installed="$(pipx runpip "$tool" show "$tool" 2>/dev/null | awk -F ": " '$1 == "Version" { print $2; exit }')"
     [ "$installed" = "$version" ] \
       || die "$tool version mismatch: lock requires $version, installed ${installed:-unknown}."
