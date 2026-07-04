@@ -34,6 +34,7 @@ install_galeed_app "$ROOT"
 start_hoglah_worker
 inject_mahalath_into_tirzah "$ROOT"
 render_tirzah_config
+install_tirzah_ui
 
 # --- 4/4 health ------------------------------------------------------------
 log "4/4  Health"

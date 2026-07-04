@@ -89,7 +89,7 @@ pip_spec() {
 # PyPI (and 'cairn' on PyPI is an unrelated project). They are --preinstall-ed
 # into each tool's venv from the lock, which both lets pip resolve them and
 # pins the right package instead of a PyPI name-collision.
-FAMILY_LIBS="galeed keturah cairn"
+FAMILY_LIBS="galeed keturah cairn-lang"
 
 _is_family_lib() { case " $FAMILY_LIBS " in *" $1 "*) return 0 ;; *) return 1 ;; esac; }
 
@@ -211,6 +211,28 @@ install_galeed_app() {
   info "galeed $version [cli,web]  <-  $raw"
   pipx install --force ${pip_args[@]+"${pip_args[@]}"} "$spec" >/dev/null \
     || { warn "pipx install galeed failed — debugger CLI unavailable (tools still emit)."; return 0; }
+}
+
+# Serve the Mahlah UI from the installed Tirzah: build the front end (when the
+# repo and npm are available) and copy the dist into the pipx venv's static
+# dir. The tirzah wheel ships no built UI, so this must re-run after every
+# tirzah (re)install. Failure is a warn — the API still serves a fallback page.
+install_tirzah_ui() {
+  local ui_src="${MAHLAH_DIR:-$HOME/domains/Mahlah}" webdir
+  pipx list 2>/dev/null | grep -q "package tirzah" || return 0
+  [ -f "$ui_src/package.json" ] \
+    || { info "mahlah repo not found ($ui_src) — tirzah serves the API-only fallback page."; return 0; }
+  command -v npm >/dev/null 2>&1 \
+    || { warn "npm not found — cannot build the Mahlah UI."; return 0; }
+  info "build Mahlah UI -> installed tirzah"
+  ( cd "$ui_src" && npm install --silent >/dev/null 2>&1 && npm run build >/dev/null 2>&1 ) \
+    || { warn "Mahlah UI build failed — tirzah serves the API-only fallback page."; return 0; }
+  webdir="$(ls -d "$HOME"/.local/share/pipx/venvs/tirzah/lib/python3*/site-packages/tirzah/web 2>/dev/null | head -1)"
+  [ -n "$webdir" ] || { warn "installed tirzah web dir not found — UI not installed."; return 0; }
+  mkdir -p "$webdir/static"
+  rm -rf "$webdir/static/assets"
+  cp -r "$ui_src"/dist/. "$webdir/static/" || { warn "UI copy failed."; return 0; }
+  info "Mahlah UI installed into tirzah"
 }
 
 # Render the active Tirzah config from .env so the semantic seam is on by default

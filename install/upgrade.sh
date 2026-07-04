@@ -50,6 +50,7 @@ inject_galeed "$ROOT"   # pipx --force reinstall wipes injected packages
 install_galeed_app "$ROOT"
 inject_mahalath_into_tirzah "$ROOT"
 restart_hoglah_worker   # pick up the upgraded hoglah code
+install_tirzah_ui
 
 # --- 3/4 migrations --------------------------------------------------------
 log "3/4  Migrations"

@@ -9,8 +9,8 @@ tirzah      1.3.0     ~/domains/Tirzah
 hoglah      0.8.0     ~/domains/Hoglah
 # Family libraries: dependencies of the tools, no console apps, and not on
 # PyPI — preinstalled into each tool's venv (never pipx-installed as apps).
-# NB 'cairn' on PyPI is an UNRELATED project; the preinstall pins ours.
+# NB the PyPI 'cairn' is an UNRELATED project — ours ships as cairn-lang (import: cairn).
 galeed      0.2.0     ~/domains/Galeed
 keturah     0.1.0     ~/domains/Keturah
-cairn       0.3.0     ~/domains/Cairn
+cairn-lang  0.3.0     ~/domains/Cairn
 # milcah    deferred  ~/domains/Milcah   # pre-prod; add when FR10 persistence lands
