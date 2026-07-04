@@ -159,7 +159,7 @@ inject_mahalath_into_tirzah() {
   spec="$(pip_spec "mahalath" "" "$raw")" \
     || { warn "mahalath source missing — skipping inject (set mahalath_enabled:false)."; return 0; }
   info "inject mahalath into tirzah (semantic precision seam)"
-  pipx inject tirzah "$spec" >/dev/null 2>&1 \
+  pipx inject --force tirzah "$spec" >/dev/null 2>&1 \
     || warn "mahalath inject failed — semantic precision will be a no-op until fixed."
 }
 
@@ -176,7 +176,7 @@ inject_galeed() {
   for tool in hoglah mahalath tirzah; do
     pipx list 2>/dev/null | grep -q "package $tool" || continue
     info "inject galeed into $tool (family trace spine)"
-    pipx inject "$tool" "$spec" >/dev/null 2>&1 \
+    pipx inject --force "$tool" "$spec" >/dev/null 2>&1 \
       || warn "galeed inject into $tool failed — its spine emission will no-op."
   done
   if pipx list 2>/dev/null | grep -q "package hoglah"; then
