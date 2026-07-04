@@ -68,3 +68,13 @@ if grep -qE "install .*$tmp/libsrc\$" "$tmp/install.log"; then
 fi
 
 echo "install_lib family-library wheelhouse: pass"
+
+# galeed also installs as an APP (the debugger CLI) with its cli+web extras.
+: > "$tmp/install.log"
+PATH="$tmp/bin:$PATH" VERSIONS_LOCK="$tmp/versions.lock" MOCK_VERSION=0.1.0 \
+  MOCK_LOG="$tmp/install.log" install_galeed_app "$ROOT" >/dev/null 2>&1
+
+grep -q -- "galeed\[cli,web\] @ file://$tmp/libsrc" "$tmp/install.log" \
+  || { echo "expected galeed app install with cli,web extras" >&2; exit 1; }
+
+echo "install_lib galeed app install: pass"

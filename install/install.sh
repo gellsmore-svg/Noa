@@ -30,6 +30,7 @@ install_pinned_tools "$ROOT"
 # --- 3/4 worker + adapters + active config ---------------------------------
 log "3/4  Real adapters (Hoglah worker + Tirzah<-Mahalath seam + Galeed spine)"
 inject_galeed "$ROOT"
+install_galeed_app "$ROOT"
 start_hoglah_worker
 inject_mahalath_into_tirzah "$ROOT"
 render_tirzah_config
@@ -42,3 +43,4 @@ log "Done. Stack is up."
 info "Load the stack env in your shell so the tools see the config:"
 info "    source $ROOT/.env        # (or add it to ~/.bashrc)"
 info "Then try:  tirzah ask --query 'what does substrate mean here?'"
+info "Debug LLM calls:  galeed trace --follow   (or 'galeed serve' + Mizpah for the browser)"

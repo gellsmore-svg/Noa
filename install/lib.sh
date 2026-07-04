@@ -185,6 +185,28 @@ inject_galeed() {
   fi
 }
 
+# The family LLM debugger: galeed doubles as an APP now (`galeed trace` /
+# `galeed serve` console script), so stack machines get the debugging CLI and
+# trace API out of the box, installed with its cli+web extras. The wheelhouse
+# find-links resolves the local galeed wheel; the extras (rich, pymongo,
+# fastapi, uvicorn) come from PyPI.
+install_galeed_app() {
+  local root="$1" lock raw version spec wheelhouse
+  local pip_args=()
+  lock="$(versions_lock "$root")"
+  raw="$(grep -E '^galeed ' "$lock" | awk '{print $3}')"
+  version="$(grep -E '^galeed ' "$lock" | awk '{print $2}')"
+  spec="$(pip_spec "galeed" "[cli,web]" "$raw")" \
+    || { warn "galeed source missing — the galeed debugger CLI will not be installed."; return 0; }
+  wheelhouse="${NOA_BUILT_WHEELHOUSE:-${NOA_WHEELHOUSE:-$HOME/.cache/noa/wheelhouse}}"
+  if find "$wheelhouse" -maxdepth 1 -name '*.whl' -print -quit 2>/dev/null | grep -q .; then
+    pip_args=(--pip-args "--find-links $wheelhouse")
+  fi
+  info "galeed $version [cli,web]  <-  $raw"
+  pipx install --force ${pip_args[@]+"${pip_args[@]}"} "$spec" >/dev/null \
+    || { warn "pipx install galeed failed — debugger CLI unavailable (tools still emit)."; return 0; }
+}
+
 # Render the active Tirzah config from .env so the semantic seam is on by default
 # (feedback: a missing TIRZAH_CONFIG file silently disabled it). Won't clobber a
 # file the user has already edited.
