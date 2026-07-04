@@ -103,6 +103,7 @@ build_family_wheelhouse() {
   rm -rf "$wheelhouse"
   mkdir -p "$wheelhouse"
 
+  : > "$wheelhouse/family-constraints.txt"
   while read -r tool version src; do
     _is_family_lib "$tool" || continue
     spec="$(pip_spec "$tool" "" "$src")" \
@@ -110,6 +111,11 @@ build_family_wheelhouse() {
     info "wheel $tool $version  <-  $src"
     python3 -m pip wheel --no-deps --wheel-dir "$wheelhouse" "$spec" >/dev/null \
       || die "building wheel for $tool failed."
+    # Exact pin: 'cairn' on PyPI is an unrelated project whose versions can
+    # outrank ours in a find-links + index resolve (it shipped the WRONG
+    # package once) — constraints force the family version, which only the
+    # wheelhouse can satisfy.
+    printf '%s==%s\n' "$tool" "$version" >> "$wheelhouse/family-constraints.txt"
   done < <(grep -vE '^\s*#|^\s*$' "$lock")
 
   find "$wheelhouse" -maxdepth 1 -name '*.whl' -print -quit | grep -q . \
@@ -128,7 +134,7 @@ install_pinned_tools() {
   build_family_wheelhouse "$root"
   wheelhouse="$NOA_BUILT_WHEELHOUSE"
   if find "$wheelhouse" -maxdepth 1 -name '*.whl' -print -quit | grep -q .; then
-    pip_args=(--pip-args "--find-links $wheelhouse")
+    pip_args=(--pip-args "--find-links $wheelhouse --constraint $wheelhouse/family-constraints.txt")
   fi
 
   # Pass 2: install the app tools.
@@ -200,7 +206,7 @@ install_galeed_app() {
     || { warn "galeed source missing — the galeed debugger CLI will not be installed."; return 0; }
   wheelhouse="${NOA_BUILT_WHEELHOUSE:-${NOA_WHEELHOUSE:-$HOME/.cache/noa/wheelhouse}}"
   if find "$wheelhouse" -maxdepth 1 -name '*.whl' -print -quit 2>/dev/null | grep -q .; then
-    pip_args=(--pip-args "--find-links $wheelhouse")
+    pip_args=(--pip-args "--find-links $wheelhouse --constraint $wheelhouse/family-constraints.txt")
   fi
   info "galeed $version [cli,web]  <-  $raw"
   pipx install --force ${pip_args[@]+"${pip_args[@]}"} "$spec" >/dev/null \

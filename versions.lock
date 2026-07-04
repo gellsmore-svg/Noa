@@ -12,5 +12,5 @@ hoglah      0.8.0     ~/domains/Hoglah
 # NB 'cairn' on PyPI is an UNRELATED project; the preinstall pins ours.
 galeed      0.2.0     ~/domains/Galeed
 keturah     0.1.0     ~/domains/Keturah
-cairn       0.2.0     ~/domains/Cairn
+cairn       0.3.0     ~/domains/Cairn
 # milcah    deferred  ~/domains/Milcah   # pre-prod; add when FR10 persistence lands
