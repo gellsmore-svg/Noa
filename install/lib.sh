@@ -66,7 +66,16 @@ pip_spec() {
   src="${src/#\~/$HOME}"
   case "$src" in
     git+*|http://*|https://*) printf '%s%s @ %s' "$name" "$extra" "$src" ;;
-    *) [ -e "$src" ] && printf '%s%s' "$src" "$extra" || return 1 ;;
+    *)
+      [ -e "$src" ] || return 1
+      local abs
+      if [ -d "$src" ]; then
+        abs="$(cd "$src" && pwd -P)"
+      else
+        abs="$(cd "$(dirname "$src")" && pwd -P)/$(basename "$src")"
+      fi
+      printf '%s%s @ file://%s' "$name" "$extra" "$abs"
+      ;;
   esac
 }
 
@@ -78,36 +87,56 @@ FAMILY_LIBS="galeed keturah cairn"
 
 _is_family_lib() { case " $FAMILY_LIBS " in *" $1 "*) return 0 ;; *) return 1 ;; esac; }
 
-# Install each tool pinned in the lock file via pipx (local path OR git tag).
-# hoglah gets the [cli] extra (the `hoglah` command needs typer). Family
-# libraries from the lock are preinstalled into every tool's venv (see above);
-# needs pipx with --preinstall (>= 1.3).
-install_pinned_tools() {
-  local root="$1" lock tool version src extra spec installed
-  local preinstall=()
-  require_cmd pipx "Install it: python -m pip install --user pipx && pipx ensurepath"
-  pipx install --help 2>/dev/null | grep -q -- --preinstall \
-    || die "pipx with --preinstall support (>= 1.3) is required; found $(pipx --version 2>/dev/null || echo unknown)."
+# Build local wheels for unpublished family libraries. Pip can then satisfy
+# dependencies like `galeed>=0.1` or `keturah>=0.1` without consulting PyPI.
+build_family_wheelhouse() {
+  local root="$1" lock wheelhouse tool version src spec
   lock="$(versions_lock "$root")"
+  wheelhouse="${NOA_WHEELHOUSE:-$HOME/.cache/noa/wheelhouse}"
+  NOA_BUILT_WHEELHOUSE="$wheelhouse"
+  rm -rf "$wheelhouse"
+  mkdir -p "$wheelhouse"
 
-  # Pass 1: collect the family libraries as --preinstall flags.
   while read -r tool version src; do
     _is_family_lib "$tool" || continue
     spec="$(pip_spec "$tool" "" "$src")" \
       || { warn "$tool: source '$src' missing — tools depending on it may not resolve."; continue; }
-    preinstall+=(--preinstall "$spec")
+    info "wheel $tool $version  <-  $src"
+    python3 -m pip wheel --no-deps --wheel-dir "$wheelhouse" "$spec" >/dev/null \
+      || die "building wheel for $tool failed."
   done < <(grep -vE '^\s*#|^\s*$' "$lock")
-  [ ${#preinstall[@]} -gt 0 ] \
-    || warn "no family libraries in the lock — fresh installs may fail to resolve galeed/keturah/cairn."
+
+  find "$wheelhouse" -maxdepth 1 -name '*.whl' -print -quit | grep -q . \
+    || warn "no family library wheels built — fresh installs may fail to resolve galeed/keturah/cairn."
+}
+
+# Install each tool pinned in the lock file via pipx (local path OR git tag).
+# hoglah gets the [cli] extra (the `hoglah` command needs typer). Family
+# libraries from the lock are built into a local wheelhouse so unpublished
+# dependencies resolve deterministically during pipx install.
+install_pinned_tools() {
+  local root="$1" lock tool version src extra spec installed
+  local wheelhouse pip_args=()
+  require_cmd pipx "Install it: python -m pip install --user pipx && pipx ensurepath"
+  lock="$(versions_lock "$root")"
+  build_family_wheelhouse "$root"
+  wheelhouse="$NOA_BUILT_WHEELHOUSE"
+  if find "$wheelhouse" -maxdepth 1 -name '*.whl' -print -quit | grep -q .; then
+    pip_args=(--pip-args "--find-links $wheelhouse")
+  fi
 
   # Pass 2: install the app tools.
   while read -r tool version src; do
     _is_family_lib "$tool" && continue
-    extra=""; [ "$tool" = "hoglah" ] && extra="[cli]"
+    extra=""
+    case "$tool" in
+      hoglah) extra="[cli]" ;;
+      tirzah) extra="[web]" ;;
+    esac
     spec="$(pip_spec "$tool" "$extra" "$src")" \
       || { warn "$tool: source '$src' missing — skipping."; continue; }
     info "$tool $version  <-  $src"
-    pipx install --force ${preinstall[@]+"${preinstall[@]}"} "$spec" >/dev/null \
+    pipx install --force "${pip_args[@]}" "$spec" >/dev/null \
       || die "pipx install $tool failed."
     installed="$(pipx runpip "$tool" show "$tool" 2>/dev/null | awk -F ": " '$1 == "Version" { print $2; exit }')"
     [ "$installed" = "$version" ] \
