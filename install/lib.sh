@@ -170,6 +170,21 @@ inject_mahalath_into_tirzah() {
     || warn "mahalath inject failed — semantic precision will be a no-op until fixed."
 }
 
+# The Hoglah-first LLM policy: Tirzah's hoglah answer/planner adapter needs the
+# hoglah LIBRARY importable inside Tirzah's isolated pipx env (found live: the
+# missing inject made every planner call fail silently into fallback plans).
+inject_hoglah_into_tirzah() {
+  local root="$1" lock raw spec
+  pipx list 2>/dev/null | grep -q "package tirzah" || return 0
+  lock="$(versions_lock "$root")"
+  raw="$(grep -E '^hoglah ' "$lock" | awk '{print $3}')"
+  spec="$(pip_spec "hoglah" "" "$raw")" \
+    || { warn "hoglah source missing — tirzah's hoglah adapter will be unavailable."; return 0; }
+  info "inject hoglah into tirzah (Hoglah-first LLM routing)"
+  pipx inject --force tirzah "$spec" >/dev/null 2>&1 \
+    || warn "hoglah inject into tirzah failed — its hoglah adapter will error."
+}
+
 # The trace spine: galeed is a library (not on PyPI, no console app), so it is
 # injected into each tool's isolated pipx env from the lock source. Hoglah also
 # gets pymongo (its core is Mongo-free) so job events persist rather than being

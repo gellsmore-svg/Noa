@@ -33,6 +33,7 @@ inject_galeed "$ROOT"
 install_galeed_app "$ROOT"
 start_hoglah_worker
 inject_mahalath_into_tirzah "$ROOT"
+inject_hoglah_into_tirzah "$ROOT"
 render_tirzah_config
 install_tirzah_ui
 
