@@ -13,4 +13,4 @@ hoglah      0.8.0     ~/domains/Hoglah
 galeed      0.2.0     ~/domains/Galeed
 keturah     0.1.0     ~/domains/Keturah
 cairn-lang  0.5.2     ~/domains/Cairn
-# milcah    deferred  ~/domains/Milcah   # pre-prod; add when FR10 persistence lands
+milcah      0.2.0     ~/domains/Milcah

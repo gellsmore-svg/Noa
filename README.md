@@ -48,8 +48,8 @@ Upgrades (after bumping `versions.lock`):
 are **done**: Mahalath/Tirzah have portable Ollama config + env overrides, and
 retrieval resolves key terms to live MPL labels/senses that condition *and* annotate
 the answer (`workflows/semantic_smoke.py` passes on live labels; see
-[integration.md](docs/integration.md)). The minimum-viable stack is Mahalath +
-Tirzah + Hoglah; Milcah is deferred. Remaining: package/orchestration polish
+[integration.md](docs/integration.md)). The stack is Mahalath + Tirzah +
+Hoglah + Milcah (coherence engine, snapshot viewer, specialist seam). Remaining: package/orchestration polish
 (install.sh, upgrade/backup), then change-control (report §5, §7 stages 3/5/6).
 
 ## Hard rule

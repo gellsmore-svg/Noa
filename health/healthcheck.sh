@@ -50,7 +50,7 @@ else
 fi
 
 # CLIs on PATH
-for tool in mahalath tirzah hoglah; do
+for tool in mahalath tirzah hoglah milcah; do
   if command -v "$tool" >/dev/null 2>&1; then
     ok "$tool: $("$tool" --version 2>/dev/null | head -1)"
   else

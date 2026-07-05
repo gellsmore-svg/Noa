@@ -144,6 +144,7 @@ install_pinned_tools() {
     case "$tool" in
       hoglah) extra="[cli]" ;;
       tirzah) extra="[web]" ;;
+      milcah) extra="[mongo,web,hoglah,galeed]" ;;
     esac
     spec="$(pip_spec "$tool" "$extra" "$src")" \
       || { warn "$tool: source '$src' missing — skipping."; continue; }
