@@ -7,17 +7,59 @@ the family supply process, review, trace, and memory).
 
 ## Status (2026-07-06)
 
-- **Phase 1 server-half DONE (grok).** Keturah now ships a minimal stdio MCP
-  server — `keturah/mcp.py` `run_stdio_server(registry, handlers=…)` (JSON-RPC:
-  `initialize`, `tools/list` via `registry.to_mcp(namespaced=True)`, `tools/call`
-  dispatch) + a `main()` entry — pure stdlib, reusable for Codex/Claude Code/
-  Cursor (Keturah `efe6ce7`). The linchpin exists.
-- **Remaining:** real handlers that call family tools (Tirzah memory
-  search/retrieve; Milcah review) wired to the server; the Galeed hook bridge;
-  Noa install wiring (render `~/.codex/config.toml` `mcp_servers` → the Keturah
-  server, hooks → Galeed) + AGENTS.md template. (grok has MCP work in Noa too —
-  not yet on `main` as of this note; coordinate before re-building the install
-  wiring.)
+**Done & verified live on the dev box:**
+
+- **Keturah stdio MCP server** — `keturah/mcp.py` `run_stdio_server` + `keturah-mcp`
+  console script (JSON-RPC `initialize` / `tools/list` via
+  `registry.to_mcp(namespaced=True)` / `tools/call` dispatch). Keturah 0.2.0.
+- **Family-tool handlers wired** — `keturah.mcp` `main()` registers Tirzah's
+  handlers (`tirzah.mcp_handlers.build_handlers`) alongside grok's semantic one.
+  Tirzah 1.11.0 exposes **`tirzah.search_memory`** (graph-memory search) and
+  **`tirzah.coherence_check`** (Milcah pressure-test), both declared in
+  `tirzah.manifest` so they appear in `tools/list` *and* dispatch on `tools/call`.
+  Confirmed end-to-end over stdio on the dev box.
+- **Noa install scaffolding** — `render_mcp_server_config` writes
+  `~/.codex/keturah-mcp.toml.example` (grok `ac0de89`).
+
+Pins: tirzah 1.11.0, keturah 0.2.0 (Noa `versions.lock`).
+
+## Next tasks — ready for pickup (codex)
+
+Two concrete, self-contained pieces remain; the example config grok renders
+already names both of their interfaces.
+
+### Task A — `galeed-codex-hook` (the trace bridge) · repo: **Galeed**
+- **Goal:** a console script that turns a Codex lifecycle hook into a Galeed
+  event, so a coding run is browsable in Mizpah.
+- **Interface (already referenced in the example config):**
+  `galeed-codex-hook <EventName>` — event name in argv (`SessionStart`,
+  `PreToolUse`, `PostToolUse`, `Stop`, …), the hook payload as JSON on **stdin**.
+- **Do:** add `galeed-codex-hook = "galeed.codex_hook:main"` to Galeed's
+  `[project.scripts]`; `main()` reads argv[1] + stdin JSON and emits via the
+  existing spine: `Tracer(trace_id=<session/rollout id>, session_id="codex",
+  source="codex").emit(f"codex.{event}", summary=…, **fields)`. Best-effort,
+  never non-zero-exit into Codex.
+- **Acceptance:** `echo '{"tool":"apply_patch"}' | galeed-codex-hook PostToolUse`
+  creates a `codex.PostToolUse` Galeed event; a real `codex exec` run then shows
+  as a trace in Mizpah.
+
+### Task B — install `keturah-mcp` + activate the config · repo: **Noa**
+- **Goal:** after `install.sh`, `keturah-mcp` is on PATH and Codex loads it (and,
+  once Task A lands, the Galeed hooks).
+- **Do:** (1) add an `install_keturah_app` in `install/lib.sh` mirroring
+  `install_cairn_app`/`install_galeed_app` (pipx-install `keturah` so `keturah-mcp`
+  is on PATH; wheelhouse resolves it), called from install.sh/upgrade.sh; (2)
+  extend `render_mcp_server_config` to write/merge a real `~/.codex/config.toml`
+  `[mcp_servers.keturah]` (not just `.example`), and uncomment the `[hooks]`
+  block once `galeed-codex-hook` exists.
+- **Acceptance:** on a fresh `install.sh`, `command -v keturah-mcp` succeeds and
+  `codex exec "search family memory for X"` can call `tirzah.search_memory`;
+  hook events reach Galeed.
+
+### Task C — Phase 0 proof (after A+B)
+Drive `codex exec --json` on one real change in a family repo; confirm the run
+traces to Mizpah and the agent can pull memory / request a coherence check.
+This closes Phase 0–2 of the plan.
 
 ## Locked decisions
 
