@@ -400,3 +400,36 @@ run_migrations() {
     info "no migrate command yet — skipping (see report §5)."
   fi
 }
+
+# Render example MCP server registration for coding agents (Codex, Claude Code, etc.).
+# The Keturah MCP server (new in 2026-07) lets external agents call family tools
+# (Tirzah memory, Milcah review, ...) using the standard MCP protocol.
+# See docs/codex-integration-plan.md and tirzah-coding-evaluation.md.
+render_mcp_server_config() {
+  local codex_dir="${HOME}/.codex"
+  mkdir -p "$codex_dir"
+
+  cat > "$codex_dir/keturah-mcp.toml.example" <<'TOML'
+# Example registration for the Keturah family MCP server.
+# This lets Codex (and Claude Code / Cursor) discover and call Tirzah, Milcah, etc.
+#
+# Copy the [mcp_servers] section into your real ~/.codex/config.toml
+# (or the equivalent location for Claude Code).
+
+[mcp_servers.keturah]
+command = "keturah-mcp"
+# args = ["--name", "keturah-family"]   # optional
+env = { "PYTHONUNBUFFERED" = "1" }
+
+# Future: lifecycle hooks for full tracing (Galeed)
+# [hooks]
+# SessionStart = [ "galeed-codex-hook", "start" ]
+# PostToolUse  = [ "galeed-codex-hook", "tool" ]
+# Stop         = [ "galeed-codex-hook", "stop" ]
+TOML
+
+  info "Wrote example MCP client config -> $codex_dir/keturah-mcp.toml.example"
+  info "Activate by ensuring 'keturah-mcp' is on PATH (pipx install keturah or from the stack venv)"
+  info "Then restart your coding agent (Codex / Claude Code)."
+}
+

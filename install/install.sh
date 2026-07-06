@@ -42,9 +42,13 @@ install_tirzah_ui
 log "4/4  Health"
 "$ROOT/health/healthcheck.sh" || die "Healthcheck reported problems — see above."
 
+# New (MCP / coding agent integration)
+render_mcp_server_config || true
+
 log "Done. Stack is up."
 info "Load the stack env in your shell so the tools see the config:"
 info "    source $ROOT/.env        # (or add it to ~/.bashrc)"
 info "Then try:  tirzah ask --query 'what does substrate mean here?'"
 info "Debug LLM calls:  galeed trace --follow   (or 'galeed serve' + Mizpah for the browser)"
 info "Compose process views:  cairn-serve   (http://127.0.0.1:8795 — save views as templates)"
+info "New: MCP server for coding agents (Codex/Claude Code): keturah-mcp  (see ~/.codex/keturah-mcp.toml.example)"
