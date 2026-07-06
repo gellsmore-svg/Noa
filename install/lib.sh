@@ -421,11 +421,12 @@ command = "keturah-mcp"
 # args = ["--name", "keturah-family"]   # optional
 env = { "PYTHONUNBUFFERED" = "1" }
 
-# Future: lifecycle hooks for full tracing (Galeed)
+# Future / current: lifecycle hooks for full tracing (Galeed)
 # [hooks]
-# SessionStart = [ "galeed-codex-hook", "start" ]
-# PostToolUse  = [ "galeed-codex-hook", "tool" ]
-# Stop         = [ "galeed-codex-hook", "stop" ]
+# SessionStart = ["galeed-codex-hook", "SessionStart"]
+# PreToolUse   = ["galeed-codex-hook", "PreToolUse"]
+# PostToolUse  = ["galeed-codex-hook", "PostToolUse"]
+# Stop         = ["galeed-codex-hook", "Stop"]
 TOML
 
   info "Wrote example MCP client config -> $codex_dir/keturah-mcp.toml.example"
