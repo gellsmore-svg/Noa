@@ -227,6 +227,30 @@ install_galeed_app() {
   info "galeed $version [cli,web]  <-  $raw"
   pipx install --force ${pip_args[@]+"${pip_args[@]}"} "$spec" >/dev/null \
     || { warn "pipx install galeed failed — debugger CLI unavailable (tools still emit)."; return 0; }
+  command -v galeed-codex-hook >/dev/null 2>&1 \
+    || warn "galeed-codex-hook is not on PATH yet — restart your shell or run 'pipx ensurepath'."
+}
+
+# The family MCP surface: keturah is also installed as a pipx APP so the
+# `keturah-mcp` stdio server is available to Codex/Claude Code without an
+# activated development venv. The wheelhouse resolves the local keturah wheel.
+install_keturah_app() {
+  local root="$1" lock raw version spec wheelhouse
+  local pip_args=()
+  lock="$(versions_lock "$root")"
+  raw="$(grep -E '^keturah ' "$lock" | awk '{print $3}')"
+  version="$(grep -E '^keturah ' "$lock" | awk '{print $2}')"
+  spec="$(pip_spec "keturah" "" "$raw")" \
+    || { warn "keturah source missing — the Keturah MCP server will not be installed."; return 0; }
+  wheelhouse="${NOA_BUILT_WHEELHOUSE:-${NOA_WHEELHOUSE:-$HOME/.cache/noa/wheelhouse}}"
+  if find "$wheelhouse" -maxdepth 1 -name '*.whl' -print -quit 2>/dev/null | grep -q .; then
+    pip_args=(--pip-args "--find-links $wheelhouse --constraint $wheelhouse/family-constraints.txt")
+  fi
+  info "keturah $version  <-  $raw  (keturah-mcp)"
+  pipx install --force ${pip_args[@]+"${pip_args[@]}"} "$spec" >/dev/null \
+    || { warn "pipx install keturah failed — keturah-mcp unavailable."; return 0; }
+  command -v keturah-mcp >/dev/null 2>&1 \
+    || warn "keturah-mcp is not on PATH yet — restart your shell or run 'pipx ensurepath'."
 }
 
 # The view composer: cairn-lang is a family LIBRARY (preinstalled into tool
@@ -401,36 +425,86 @@ run_migrations() {
   fi
 }
 
-# Render example MCP server registration for coding agents (Codex, Claude Code, etc.).
-# The Keturah MCP server (new in 2026-07) lets external agents call family tools
-# (Tirzah memory, Milcah review, ...) using the standard MCP protocol.
+_codex_family_integration_block() {
+  cat <<'TOML'
+# BEGIN Noa family Codex integration
+[mcp_servers.keturah]
+command = "keturah-mcp"
+env = { "PYTHONUNBUFFERED" = "1" }
+
+[hooks]
+SessionStart = ["galeed-codex-hook", "SessionStart"]
+PreToolUse = ["galeed-codex-hook", "PreToolUse"]
+PostToolUse = ["galeed-codex-hook", "PostToolUse"]
+PermissionRequest = ["galeed-codex-hook", "PermissionRequest"]
+UserPromptSubmit = ["galeed-codex-hook", "UserPromptSubmit"]
+Stop = ["galeed-codex-hook", "Stop"]
+PreCompact = ["galeed-codex-hook", "PreCompact"]
+PostCompact = ["galeed-codex-hook", "PostCompact"]
+SubagentStart = ["galeed-codex-hook", "SubagentStart"]
+SubagentStop = ["galeed-codex-hook", "SubagentStop"]
+# END Noa family Codex integration
+TOML
+}
+
+_write_managed_codex_config() {
+  local config="$1" tmp
+  tmp="$(mktemp "${config}.XXXXXX")" || return 1
+
+  if [ -f "$config" ]; then
+    awk '
+      /^# BEGIN Noa family Codex integration$/ { skip=1; next }
+      /^# END Noa family Codex integration$/ { skip=0; next }
+      !skip { print }
+    ' "$config" > "$tmp"
+  fi
+
+  [ ! -s "$tmp" ] || printf '\n' >> "$tmp"
+  _codex_family_integration_block >> "$tmp"
+  mv "$tmp" "$config"
+  chmod 600 "$config" 2>/dev/null || true
+}
+
+# Render MCP server registration for coding agents (Codex, Claude Code, etc.).
+# The Keturah MCP server lets external agents call family tools (Tirzah memory,
+# Milcah review, ...), while Galeed hooks trace the coding-agent lifecycle.
 # See docs/codex-integration-plan.md and tirzah-coding-evaluation.md.
 render_mcp_server_config() {
-  local codex_dir="${HOME}/.codex"
+  local codex_dir="${HOME}/.codex" codex_config
   mkdir -p "$codex_dir"
+  codex_config="$codex_dir/config.toml"
 
   cat > "$codex_dir/keturah-mcp.toml.example" <<'TOML'
-# Example registration for the Keturah family MCP server.
-# This lets Codex (and Claude Code / Cursor) discover and call Tirzah, Milcah, etc.
-#
-# Copy the [mcp_servers] section into your real ~/.codex/config.toml
-# (or the equivalent location for Claude Code).
+# Noa-managed registration for the Keturah family MCP server and Galeed hooks.
+# The installer writes this block into ~/.codex/config.toml automatically.
+# For Claude Code / Cursor, copy the relevant MCP section into their config.
 
 [mcp_servers.keturah]
 command = "keturah-mcp"
 # args = ["--name", "keturah-family"]   # optional
 env = { "PYTHONUNBUFFERED" = "1" }
 
-# Future / current: lifecycle hooks for full tracing (Galeed)
-# [hooks]
-# SessionStart = ["galeed-codex-hook", "SessionStart"]
-# PreToolUse   = ["galeed-codex-hook", "PreToolUse"]
-# PostToolUse  = ["galeed-codex-hook", "PostToolUse"]
-# Stop         = ["galeed-codex-hook", "Stop"]
+[hooks]
+SessionStart = ["galeed-codex-hook", "SessionStart"]
+PreToolUse = ["galeed-codex-hook", "PreToolUse"]
+PostToolUse = ["galeed-codex-hook", "PostToolUse"]
+PermissionRequest = ["galeed-codex-hook", "PermissionRequest"]
+UserPromptSubmit = ["galeed-codex-hook", "UserPromptSubmit"]
+Stop = ["galeed-codex-hook", "Stop"]
+PreCompact = ["galeed-codex-hook", "PreCompact"]
+PostCompact = ["galeed-codex-hook", "PostCompact"]
+SubagentStart = ["galeed-codex-hook", "SubagentStart"]
+SubagentStop = ["galeed-codex-hook", "SubagentStop"]
 TOML
 
+  _write_managed_codex_config "$codex_config" \
+    || { warn "could not update $codex_config"; return 0; }
+
+  info "Wrote active Codex MCP/hooks config -> $codex_config"
   info "Wrote example MCP client config -> $codex_dir/keturah-mcp.toml.example"
-  info "Activate by ensuring 'keturah-mcp' is on PATH (pipx install keturah or from the stack venv)"
+  command -v keturah-mcp >/dev/null 2>&1 \
+    || warn "keturah-mcp is not on PATH yet — install/upgrade should pipx-install keturah."
+  command -v galeed-codex-hook >/dev/null 2>&1 \
+    || warn "galeed-codex-hook is not on PATH yet — install/upgrade should pipx-install galeed."
   info "Then restart your coding agent (Codex / Claude Code)."
 }
-
