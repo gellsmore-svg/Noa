@@ -60,3 +60,18 @@ config templates + scripts + docs.
 ## LLM access
 Products submit LLM inference **through Hoglah**; direct Ollama adapters are
 standalone/dev fallbacks only. See [llm-access-policy.md](docs/llm-access-policy.md).
+
+## Windows Support (in progress)
+
+A native Windows installer is under analysis and development. See the
+**Windows Installer Analysis Bundle** in `docs/`:
+
+- [windows-installer-bundle.md](docs/windows-installer-bundle.md) (overview)
+- [windows-installer-analysis.md](docs/windows-installer-analysis.md)
+- [windows-service-options.md](docs/windows-service-options.md)
+- [python-embedding-options.md](docs/python-embedding-options.md)
+- [windows-config-and-selection.md](docs/windows-config-and-selection.md)
+
+The goal is a selectable installer (repos other than Relational-Substrate) that
+produces a working default local configuration on Windows 10/11. The Linux
+bash path (`install/install.sh`) remains the primary reference implementation.
