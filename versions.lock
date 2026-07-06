@@ -5,7 +5,7 @@
 #
 # tool      version   repo
 mahalath    1.1.0     ~/domains/Mahalath
-tirzah      1.4.0     ~/domains/Tirzah
+tirzah      1.8.0     ~/domains/Tirzah
 hoglah      0.8.0     ~/domains/Hoglah
 # Family libraries: dependencies of the tools, no console apps, and not on
 # PyPI — preinstalled into each tool's venv (never pipx-installed as apps).
