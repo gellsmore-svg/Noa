@@ -78,3 +78,30 @@ grep -q -- "galeed\[cli,web\] @ file://$tmp/libsrc" "$tmp/install.log" \
   || { echo "expected galeed app install with cli,web extras" >&2; exit 1; }
 
 echo "install_lib galeed app install: pass"
+
+# cairn-lang also installs as an APP (the view composer) with its web extra, even
+# though it is a family library injected into tool venvs elsewhere.
+mkdir -p "$tmp/cairnsrc/src/cairn"
+cat > "$tmp/cairnsrc/pyproject.toml" <<'TOML'
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "cairn-lang"
+version = "0.6.0"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+TOML
+touch "$tmp/cairnsrc/src/cairn/__init__.py"
+printf 'hoglah 0.8.0 %s\ngaleed 0.1.0 %s\ncairn-lang 0.6.0 %s\n' \
+  "$tmp/source" "$tmp/libsrc" "$tmp/cairnsrc" > "$tmp/versions.lock"
+: > "$tmp/install.log"
+PATH="$tmp/bin:$PATH" VERSIONS_LOCK="$tmp/versions.lock" MOCK_VERSION=0.6.0 \
+  MOCK_LOG="$tmp/install.log" install_cairn_app "$ROOT" >/dev/null 2>&1
+
+grep -q -- "cairn-lang\[web\] @ file://$tmp/cairnsrc" "$tmp/install.log" \
+  || { echo "expected cairn-lang app install with the web extra" >&2; exit 1; }
+
+echo "install_lib cairn app install: pass"

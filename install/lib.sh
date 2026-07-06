@@ -229,6 +229,30 @@ install_galeed_app() {
     || { warn "pipx install galeed failed — debugger CLI unavailable (tools still emit)."; return 0; }
 }
 
+# The view composer: cairn-lang is a family LIBRARY (preinstalled into tool
+# venvs), but it also ships console apps — `cairn-serve` (the interactive
+# transformation-view composer), plus `cairn-render` / `cairn-validate`. Install
+# it as a pipx APP with the web extra so those surfaces are on PATH out of the
+# box, the same way galeed doubles as the debugger app. The wheelhouse
+# find-links resolves the local cairn-lang + keturah wheels; the web extra
+# (fastapi, uvicorn) comes from PyPI.
+install_cairn_app() {
+  local root="$1" lock raw version spec wheelhouse
+  local pip_args=()
+  lock="$(versions_lock "$root")"
+  raw="$(grep -E '^cairn-lang ' "$lock" | awk '{print $3}')"
+  version="$(grep -E '^cairn-lang ' "$lock" | awk '{print $2}')"
+  spec="$(pip_spec "cairn-lang" "[web]" "$raw")" \
+    || { warn "cairn-lang source missing — the cairn view composer will not be installed."; return 0; }
+  wheelhouse="${NOA_BUILT_WHEELHOUSE:-${NOA_WHEELHOUSE:-$HOME/.cache/noa/wheelhouse}}"
+  if find "$wheelhouse" -maxdepth 1 -name '*.whl' -print -quit 2>/dev/null | grep -q .; then
+    pip_args=(--pip-args "--find-links $wheelhouse --constraint $wheelhouse/family-constraints.txt")
+  fi
+  info "cairn-lang $version [web]  <-  $raw  (cairn-serve composer)"
+  pipx install --force ${pip_args[@]+"${pip_args[@]}"} "$spec" >/dev/null \
+    || { warn "pipx install cairn-lang failed — the cairn view composer is unavailable."; return 0; }
+}
+
 # Serve the Mahlah UI from the installed Tirzah: build the front end (when the
 # repo and npm are available) and copy the dist into the pipx venv's static
 # dir. The tirzah wheel ships no built UI, so this must re-run after every

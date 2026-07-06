@@ -48,6 +48,7 @@ log "2/4  Reinstall pinned tools"
 install_pinned_tools "$ROOT"
 inject_galeed "$ROOT"   # pipx --force reinstall wipes injected packages
 install_galeed_app "$ROOT"
+install_cairn_app "$ROOT"
 inject_mahalath_into_tirzah "$ROOT"
 inject_hoglah_into_tirzah "$ROOT"
 restart_hoglah_worker   # pick up the upgraded hoglah code
