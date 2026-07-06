@@ -12,5 +12,5 @@ hoglah      0.8.0     ~/domains/Hoglah
 # NB the PyPI 'cairn' is an UNRELATED project — ours ships as cairn-lang (import: cairn).
 galeed      0.2.0     ~/domains/Galeed
 keturah     0.1.0     ~/domains/Keturah
-cairn-lang  0.6.0     ~/domains/Cairn
+cairn-lang  0.7.0     ~/domains/Cairn
 milcah      0.2.0     ~/domains/Milcah
