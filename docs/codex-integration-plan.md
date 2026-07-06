@@ -5,6 +5,20 @@
 don't turn Tirzah into a coding agent — orchestrate an existing engine and let
 the family supply process, review, trace, and memory).
 
+## Status (2026-07-06)
+
+- **Phase 1 server-half DONE (grok).** Keturah now ships a minimal stdio MCP
+  server — `keturah/mcp.py` `run_stdio_server(registry, handlers=…)` (JSON-RPC:
+  `initialize`, `tools/list` via `registry.to_mcp(namespaced=True)`, `tools/call`
+  dispatch) + a `main()` entry — pure stdlib, reusable for Codex/Claude Code/
+  Cursor (Keturah `efe6ce7`). The linchpin exists.
+- **Remaining:** real handlers that call family tools (Tirzah memory
+  search/retrieve; Milcah review) wired to the server; the Galeed hook bridge;
+  Noa install wiring (render `~/.codex/config.toml` `mcp_servers` → the Keturah
+  server, hooks → Galeed) + AGENTS.md template. (grok has MCP work in Noa too —
+  not yet on `main` as of this note; coordinate before re-building the install
+  wiring.)
+
 ## Locked decisions
 
 1. **Direction — Codex drives.** Codex CLI is the coding execution engine (its
