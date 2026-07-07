@@ -31,6 +31,9 @@ environment, separate from any dev checkout or virtualenv.
 - `workflows/semantic_smoke.py` — the end-to-end seam proof (A/B; passes on live labels).
 - `workflows/codex_review_gate.py` — wraps `codex exec --json --output-schema`
   with the Cairn/Milcah acceptance gate.
+- `workflows/live_observer.sh` — exports Galeed trace events and produces a
+  Cairn live-observation report for human-load, agent-effectiveness, and runtime
+  findings.
 - `docs/` — the **[readiness & integration report](docs/STACK-READINESS-REPORT.md)**
   (the full plan), plus runtime/change-management notes.
 

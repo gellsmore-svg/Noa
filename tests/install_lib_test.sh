@@ -222,6 +222,9 @@ grep -q -- "cairn-lang\[web\] @ file://$tmp/cairnsrc" "$tmp/install.log" \
 
 echo "install_lib cairn app install: pass"
 
+bash -n "$ROOT/workflows/live_observer.sh"
+echo "live_observer workflow syntax: pass"
+
 # The Codex integration writes a real config.toml, preserves existing user
 # settings, and remains idempotent across repeated install/upgrade runs.
 cat > "$tmp/bin/galeed-codex-hook" <<'SH'
