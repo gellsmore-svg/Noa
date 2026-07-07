@@ -23,8 +23,10 @@ import sys
 import tempfile
 import tomllib
 from dataclasses import dataclass
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
+from uuid import uuid4
 
 BLOCKED_EXIT = 2
 
@@ -385,6 +387,50 @@ def gate(args: argparse.Namespace, codex_run: CodexRun) -> tuple[int, dict[str, 
     return (0, result)
 
 
+def new_run_id() -> str:
+    timestamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
+    return f"codex-gate-{timestamp}-{uuid4().hex[:8]}"
+
+
+def artifact_dir(args: argparse.Namespace) -> Path | None:
+    if args.no_artifact:
+        return None
+    configured = args.artifact_dir or os.environ.get("NOA_CODEX_GATE_ARTIFACT_DIR")
+    return Path(configured).expanduser() if configured else Path.home() / ".noa" / "codex-review-runs"
+
+
+def write_artifact(
+    args: argparse.Namespace,
+    *,
+    run_id: str,
+    codex_run: CodexRun,
+    result: dict[str, Any],
+    exit_code: int,
+) -> None:
+    directory = artifact_dir(args)
+    if directory is None:
+        return
+    payload = {
+        "run_id": run_id,
+        "created_at": datetime.now(timezone.utc).isoformat(),
+        "request": args.request,
+        "repo": str(Path(args.repo).expanduser()),
+        "review_mode": args.review_mode,
+        "review_objections": args.review_objections,
+        "exit_code": exit_code,
+        "codex_returncode": codex_run.returncode,
+        "codex_events": codex_run.events,
+        "result": result,
+    }
+    try:
+        directory.mkdir(parents=True, exist_ok=True)
+        path = directory / f"{run_id}.json"
+        path.write_text(json.dumps(payload, indent=2, sort_keys=True, default=str), encoding="utf-8")
+        result["artifact_path"] = str(path)
+    except OSError as error:
+        result["artifact_error"] = str(error)
+
+
 def parse_args(argv: list[str]) -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Run Codex behind the Noa/Cairn review gate.")
     parser.add_argument("request", help="Coding request to pass to Codex or record with offline results.")
@@ -397,6 +443,8 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
     parser.add_argument("--codex-config", default=str(Path.home() / ".codex" / "config.toml"))
     parser.add_argument("--codex-result-file", help="Offline summary JSON; skips codex exec.")
     parser.add_argument("--review-result-file", help="Offline Milcah result JSON; skips MCP review.")
+    parser.add_argument("--artifact-dir", help="Directory for gate audit JSON artifacts.")
+    parser.add_argument("--no-artifact", action="store_true", help="Do not write a gate audit artifact.")
     return parser.parse_args(argv)
 
 
@@ -413,6 +461,9 @@ def main(argv: list[str] | None = None) -> int:
             schema_path.unlink()
         except OSError:
             pass
+    run_id = new_run_id()
+    result["run_id"] = run_id
+    write_artifact(args, run_id=run_id, codex_run=codex_run, result=result, exit_code=exit_code)
     print(json.dumps(result, indent=2, sort_keys=True))
     return exit_code
 

@@ -17,8 +17,8 @@ cat > "$tmp/low.json" <<'JSON'
 }
 JSON
 
-out="$("$ROOT/workflows/codex_review_gate.py" --repo "$tmp" --codex-result-file "$tmp/low.json" "doc update")"
-printf '%s' "$out" | python3 -c 'import json,sys; data=json.load(sys.stdin); assert data["status"] == "accepted_without_review"'
+out="$("$ROOT/workflows/codex_review_gate.py" --repo "$tmp" --artifact-dir "$tmp/artifacts" --codex-result-file "$tmp/low.json" "doc update")"
+printf '%s' "$out" | python3 -c 'import json,sys,pathlib; data=json.load(sys.stdin); assert data["status"] == "accepted_without_review"; path=pathlib.Path(data["artifact_path"]); assert path.exists(); artifact=json.loads(path.read_text()); assert artifact["result"]["run_id"] == data["run_id"]'
 
 cat > "$tmp/high.json" <<'JSON'
 {
@@ -42,14 +42,14 @@ cat > "$tmp/review.json" <<'JSON'
 }
 JSON
 
-if "$ROOT/workflows/codex_review_gate.py" --repo "$tmp" \
+if "$ROOT/workflows/codex_review_gate.py" --repo "$tmp" --no-artifact \
     --codex-result-file "$tmp/high.json" --review-result-file "$tmp/review.json" \
     "installer update" > "$tmp/blocked.out"; then
   echo "expected review objections to block by default" >&2
   exit 1
 fi
 printf '%s' "$(cat "$tmp/blocked.out")" \
-  | python3 -c 'import json,sys; data=json.load(sys.stdin); assert data["status"] == "blocked_by_review"'
+  | python3 -c 'import json,sys; data=json.load(sys.stdin); assert data["status"] == "blocked_by_review"; assert "artifact_path" not in data'
 
 out="$("$ROOT/workflows/codex_review_gate.py" --repo "$tmp" --review-objections warn \
   --codex-result-file "$tmp/high.json" --review-result-file "$tmp/review.json" "installer update")"
