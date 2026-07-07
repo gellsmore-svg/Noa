@@ -29,6 +29,8 @@ environment, separate from any dev checkout or virtualenv.
   + extracts the document's MPL terms first, then Tirzah ingests the same document, so
   retrieval resolves against those terms.
 - `workflows/semantic_smoke.py` — the end-to-end seam proof (A/B; passes on live labels).
+- `workflows/codex_review_gate.py` — wraps `codex exec --json --output-schema`
+  with the Cairn/Milcah acceptance gate.
 - `docs/` — the **[readiness & integration report](docs/STACK-READINESS-REPORT.md)**
   (the full plan), plus runtime/change-management notes.
 
