@@ -230,6 +230,30 @@ inject_tirzah_into_keturah() {
     || warn "tirzah inject into keturah failed — keturah-mcp will expose only demo/fallback tools."
 }
 
+# The review seam: Tirzah's MCP coherence tool delegates to Milcah, so Keturah's
+# isolated MCP venv must also be able to import Milcah and its Hoglah/Galeed path.
+inject_milcah_into_keturah() {
+  local root="$1" lock raw spec wheelhouse
+  local pip_arg pip_args=()
+  pipx list 2>/dev/null | grep -q "package keturah" || return 0
+  lock="$(versions_lock "$root")"
+  raw="$(awk '$1 == "milcah" { print $3; exit }' "$lock")"
+  [ -n "$raw" ] \
+    || { warn "milcah is not pinned — tirzah.coherence_check will stay unavailable."; return 0; }
+  spec="$(pip_spec "milcah" "[hoglah,galeed]" "$raw")" \
+    || { warn "milcah source missing — tirzah.coherence_check will stay unavailable."; return 0; }
+  if [ -z "${NOA_BUILT_WHEELHOUSE:-}" ]; then
+    build_family_wheelhouse "$root"
+  fi
+  wheelhouse="${NOA_BUILT_WHEELHOUSE:-${NOA_WHEELHOUSE:-$HOME/.cache/noa/wheelhouse}}"
+  if pip_arg="$(_family_wheelhouse_pip_arg "$root" "$wheelhouse")"; then
+    pip_args=(--pip-args "$pip_arg")
+  fi
+  info "inject milcah into keturah (MCP review tools)"
+  pipx inject --force keturah ${pip_args[@]+"${pip_args[@]}"} "$spec" >/dev/null 2>&1 \
+    || warn "milcah inject into keturah failed — tirzah.coherence_check will be unavailable."
+}
+
 # The trace spine: galeed is a library (not on PyPI, no console app), so it is
 # injected into each tool's isolated pipx env from the lock source. Hoglah also
 # gets pymongo (its core is Mongo-free) so job events persist rather than being
@@ -240,7 +264,7 @@ inject_galeed() {
   raw="$(grep -E '^galeed ' "$lock" | awk '{print $3}')"
   spec="$(pip_spec "galeed" "" "$raw")" \
     || { warn "galeed source missing — trace-spine emission stays a no-op."; return 0; }
-  for tool in hoglah mahalath tirzah; do
+  for tool in hoglah mahalath tirzah milcah; do
     pipx list 2>/dev/null | grep -q "package $tool" || continue
     info "inject galeed into $tool (family trace spine)"
     pipx inject --force "$tool" "$spec" >/dev/null 2>&1 \
@@ -369,6 +393,9 @@ runtime:
   mahalath_mongo_uri: ${MAHALATH_MONGO_URI:-mongodb://localhost:27017}
   mahalath_mongo_db: ${MAHALATH_MONGO_DB:-mahalath_dev}
   mahalath_strict: ${MAHALATH_STRICT:-true}
+  # Review seam (Tirzah -> Milcah). Bounded and fail-soft when the worker is down.
+  milcah_enabled: ${MILCAH_ENABLED:-true}
+  milcah_model: "${MILCAH_MODEL:-}"
 YAML
   info "wrote active tirzah config -> $cfg"
 }
@@ -488,12 +515,22 @@ _resolve_console_script() {
 _codex_family_integration_block() {
   local hook keturah e
   local tirzah_mongo_uri tirzah_mongo_db mahalath_mongo_uri mahalath_mongo_db tirzah_config
+  local hoglah_db_path hoglah_output_dir hoglah_ollama_host
+  local milcah_enabled milcah_model milcah_galeed_enabled milcah_galeed_mongo_uri milcah_galeed_mongo_db
   keturah="$(_resolve_console_script keturah keturah-mcp)"
   hook="$(_resolve_console_script galeed galeed-codex-hook)"
   tirzah_mongo_uri="${TIRZAH_MONGO_URI:-mongodb://localhost:27017}"
   tirzah_mongo_db="${TIRZAH_MONGO_DB:-mnemosyne_dev}"
   mahalath_mongo_uri="${MAHALATH_MONGO_URI:-mongodb://localhost:27017}"
   mahalath_mongo_db="${MAHALATH_MONGO_DB:-mahalath_dev}"
+  hoglah_db_path="${HOGLAH_DB_PATH:-$HOME/.hoglah/hoglah.db}"
+  hoglah_output_dir="${HOGLAH_OUTPUT_DIR:-$HOME/.hoglah/outbox}"
+  hoglah_ollama_host="${HOGLAH_OLLAMA_HOST:-http://localhost:11434}"
+  milcah_enabled="${MILCAH_ENABLED:-true}"
+  milcah_model="${MILCAH_MODEL:-}"
+  milcah_galeed_enabled="${MILCAH_GALEED_ENABLED:-true}"
+  milcah_galeed_mongo_uri="${MILCAH_GALEED_MONGO_URI:-mongodb://localhost:27017}"
+  milcah_galeed_mongo_db="${MILCAH_GALEED_MONGO_DB:-mnemosyne_dev}"
   tirzah_config="${TIRZAH_CONFIG:-}"
   printf '# BEGIN Noa family Codex integration
 '
@@ -501,8 +538,13 @@ _codex_family_integration_block() {
 '
   printf 'command = "%s"
 ' "$keturah"
-  printf 'env = { "PYTHONUNBUFFERED" = "1", "TIRZAH_MONGO_URI" = "%s", "TIRZAH_MONGO_DB" = "%s", "MAHALATH_MONGO_URI" = "%s", "MAHALATH_MONGO_DB" = "%s"' \
-    "$tirzah_mongo_uri" "$tirzah_mongo_db" "$mahalath_mongo_uri" "$mahalath_mongo_db"
+  printf 'env = { "PYTHONUNBUFFERED" = "1", "TIRZAH_MONGO_URI" = "%s", "TIRZAH_MONGO_DB" = "%s", "MAHALATH_MONGO_URI" = "%s", "MAHALATH_MONGO_DB" = "%s", "HOGLAH_DB_PATH" = "%s", "HOGLAH_OUTPUT_DIR" = "%s", "HOGLAH_OLLAMA_HOST" = "%s", "MILCAH_ENABLED" = "%s", "MILCAH_GALEED_ENABLED" = "%s", "MILCAH_GALEED_MONGO_URI" = "%s", "MILCAH_GALEED_MONGO_DB" = "%s"' \
+    "$tirzah_mongo_uri" "$tirzah_mongo_db" "$mahalath_mongo_uri" "$mahalath_mongo_db" \
+    "$hoglah_db_path" "$hoglah_output_dir" "$hoglah_ollama_host" \
+    "$milcah_enabled" "$milcah_galeed_enabled" "$milcah_galeed_mongo_uri" "$milcah_galeed_mongo_db"
+  if [ -n "$milcah_model" ]; then
+    printf ', "MILCAH_MODEL" = "%s"' "$milcah_model"
+  fi
   if [ -n "$tirzah_config" ]; then
     printf ', "TIRZAH_CONFIG" = "%s"' "$tirzah_config"
   fi
@@ -516,6 +558,9 @@ approval_mode = "approve"
 approval_mode = "approve"
 
 [mcp_servers.keturah.tools."tirzah.search_memory"]
+approval_mode = "approve"
+
+[mcp_servers.keturah.tools."tirzah.coherence_check"]
 approval_mode = "approve"
 
 '

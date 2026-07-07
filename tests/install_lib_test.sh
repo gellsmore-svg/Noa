@@ -29,7 +29,7 @@ if [ "$1" = runpip ]; then
   exit 0
 fi
 if [ "$1" = list ]; then
-  printf 'package hoglah\npackage keturah\npackage mahalath\npackage tirzah\n'
+  printf 'package hoglah\npackage keturah\npackage mahalath\npackage tirzah\npackage milcah\n'
   exit 0
 fi
 exit 0
@@ -163,6 +163,38 @@ grep -q -- "inject --force keturah .*tirzah @ file://$tmp/tirzahsrc" "$tmp/insta
 
 echo "install_lib keturah tirzah injection: pass"
 
+# Keturah's MCP app venv also gets Milcah injected, so the Tirzah review tool
+# can import the provider path when tirzah.coherence_check is enabled.
+mkdir -p "$tmp/milcahsrc/src/milcah"
+cat > "$tmp/milcahsrc/pyproject.toml" <<'TOML'
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "milcah"
+version = "0.2.0"
+
+[project.optional-dependencies]
+hoglah = ["hoglah>=0.8.0"]
+galeed = ["galeed>=0.1"]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+TOML
+touch "$tmp/milcahsrc/src/milcah/__init__.py"
+printf 'hoglah 0.8.0 %s\ntirzah 1.11.0 %s\ngaleed 0.1.0 %s\nketurah 0.2.0 %s\nmilcah 0.2.0 %s\n' \
+  "$tmp/source" "$tmp/tirzahsrc" "$tmp/libsrc" "$tmp/keturahsrc" "$tmp/milcahsrc" > "$tmp/versions.lock"
+: > "$tmp/install.log"
+unset NOA_BUILT_WHEELHOUSE
+PATH="$tmp/bin:$PATH" VERSIONS_LOCK="$tmp/versions.lock" MOCK_LOG="$tmp/install.log" \
+  inject_milcah_into_keturah "$ROOT" >/dev/null 2>&1
+
+grep -q -- "inject --force keturah .*milcah\\[hoglah,galeed\\] @ file://$tmp/milcahsrc" "$tmp/install.log" \
+  || { echo "expected milcah inject into keturah app venv" >&2; exit 1; }
+
+echo "install_lib keturah milcah injection: pass"
+
 # cairn-lang also installs as an APP (the view composer) with its web extra, even
 # though it is a family library injected into tool venvs elsewhere.
 mkdir -p "$tmp/cairnsrc/src/cairn"
@@ -215,8 +247,14 @@ grep -q -- '\[mcp_servers.keturah.tools."demo.echo"\]' "$tmp/home/.codex/config.
   || { echo "expected demo.echo approval in active config" >&2; exit 1; }
 grep -q -- '\[mcp_servers.keturah.tools."tirzah.search_memory"\]' "$tmp/home/.codex/config.toml" \
   || { echo "expected tirzah.search_memory approval in active config" >&2; exit 1; }
+grep -q -- '\[mcp_servers.keturah.tools."tirzah.coherence_check"\]' "$tmp/home/.codex/config.toml" \
+  || { echo "expected tirzah.coherence_check approval in active config" >&2; exit 1; }
 grep -q -- '"TIRZAH_MONGO_DB" = "mnemosyne_dev"' "$tmp/home/.codex/config.toml" \
   || { echo "expected Tirzah MCP env in active config" >&2; exit 1; }
+grep -q -- '"MILCAH_ENABLED" = "true"' "$tmp/home/.codex/config.toml" \
+  || { echo "expected Milcah MCP env in active config" >&2; exit 1; }
+grep -q -- '"HOGLAH_DB_PATH" = "' "$tmp/home/.codex/config.toml" \
+  || { echo "expected Hoglah queue path env in active config" >&2; exit 1; }
 grep -q -- '\[\[hooks.PostToolUse\]\]' "$tmp/home/.codex/config.toml" \
   || { echo "expected active Galeed hooks config" >&2; exit 1; }
 grep -q -- 'command = ".*galeed-codex-hook PostToolUse"' "$tmp/home/.codex/config.toml" \
