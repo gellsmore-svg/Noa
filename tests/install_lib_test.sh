@@ -225,6 +225,51 @@ echo "install_lib cairn app install: pass"
 bash -n "$ROOT/workflows/live_observer.sh"
 echo "live_observer workflow syntax: pass"
 
+cat > "$tmp/bin/galeed" <<'SH'
+#!/usr/bin/env bash
+printf '%s\n' "$*" > "$MOCK_GALEED_ARGS"
+cat <<'JSON'
+[{"trace_id":"trace_demo","session_id":"sess_demo","type":"llm.call.completed","summary":"demo","metadata":{"missing_evidence":true}}]
+JSON
+SH
+chmod +x "$tmp/bin/galeed"
+cat > "$tmp/bin/cairn-galeed-observe" <<'SH'
+#!/usr/bin/env bash
+printf '%s\n' "$*" > "$MOCK_CAIRN_ARGS"
+input="$1"
+shift
+while [ "$#" -gt 0 ]; do
+  case "$1" in
+    --observations-output) observations="$2"; shift 2 ;;
+    --output) report="$2"; shift 2 ;;
+    --title) title="$2"; shift 2 ;;
+    *) shift ;;
+  esac
+done
+test -s "$input"
+printf '{"kind":"agent_output"}\n' > "$observations"
+printf '# %s\n' "$title" > "$report"
+SH
+chmod +x "$tmp/bin/cairn-galeed-observe"
+
+observer_out="$tmp/observer"
+PATH="$tmp/bin:$PATH" MOCK_GALEED_ARGS="$tmp/galeed.args" MOCK_CAIRN_ARGS="$tmp/cairn.args" \
+  "$ROOT/workflows/live_observer.sh" --trace trace_demo --limit 5 --title "Observer Test" \
+  --out-dir "$observer_out" >/dev/null
+
+grep -q -- "events --trace trace_demo --limit 5 --json" "$tmp/galeed.args" \
+  || { echo "expected galeed trace export args" >&2; exit 1; }
+grep -q -- "--title Observer Test" "$tmp/cairn.args" \
+  || { echo "expected Cairn observer title" >&2; exit 1; }
+test -s "$observer_out/trace-trace_demo-galeed-events.json" \
+  || { echo "expected Galeed export file" >&2; exit 1; }
+test -s "$observer_out/trace-trace_demo-cairn-observations.jsonl" \
+  || { echo "expected Cairn observations file" >&2; exit 1; }
+test -s "$observer_out/trace-trace_demo-cairn-report.md" \
+  || { echo "expected Cairn report file" >&2; exit 1; }
+
+echo "live_observer workflow command chain: pass"
+
 # The Codex integration writes a real config.toml, preserves existing user
 # settings, and remains idempotent across repeated install/upgrade runs.
 cat > "$tmp/bin/galeed-codex-hook" <<'SH'
