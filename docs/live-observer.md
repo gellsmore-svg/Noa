@@ -29,6 +29,9 @@ The workflow writes three files under `reports/live-observer/`:
 - the Cairn observation JSONL,
 - the Cairn live-observation Markdown report.
 
+See `docs/examples/hoglah-live-observer-sample.md` for a real local Hoglah
+session report that surfaced queue vigilance load and long queue lifecycles.
+
 This lets a running stack answer the practical questions:
 
 - where did the system wait, fail, retry, or ask the user to repair context?
