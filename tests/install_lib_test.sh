@@ -6,6 +6,7 @@ ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 
 tmp="$(mktemp -d)"
 trap 'rm -rf "$tmp"' EXIT
+export NOA_WHEELHOUSE="$tmp/wheelhouse"
 mkdir -p "$tmp/bin" "$tmp/source"
 printf 'hoglah 0.8.0 %s\n' "$tmp/source" > "$tmp/versions.lock"
 cat > "$tmp/bin/pipx" <<'SH'
@@ -76,6 +77,19 @@ PATH="$tmp/bin:$PATH" VERSIONS_LOCK="$tmp/versions.lock" MOCK_VERSION=0.1.0 \
 
 grep -q -- "galeed\[cli,web\] @ file://$tmp/libsrc" "$tmp/install.log" \
   || { echo "expected galeed app install with cli,web extras" >&2; exit 1; }
+
+mkdir -p "$tmp/stale-wheelhouse"
+printf 'galeed==0.0.1\n' > "$tmp/stale-wheelhouse/family-constraints.txt"
+: > "$tmp/stale-wheelhouse/galeed-0.0.1-py3-none-any.whl"
+: > "$tmp/install.log"
+( unset NOA_BUILT_WHEELHOUSE
+  PATH="$tmp/bin:$PATH" NOA_WHEELHOUSE="$tmp/stale-wheelhouse" \
+    VERSIONS_LOCK="$tmp/versions.lock" MOCK_VERSION=0.1.0 MOCK_LOG="$tmp/install.log" \
+    install_galeed_app "$ROOT" >/dev/null 2>&1
+)
+if grep -q -- "--pip-args" "$tmp/install.log"; then
+  echo "stale wheelhouse constraints must not be passed to pipx" >&2; exit 1
+fi
 
 echo "install_lib galeed app install: pass"
 
@@ -157,8 +171,12 @@ grep -q -- 'model = "gpt-5"' "$tmp/home/.codex/config.toml" \
   || { echo "expected existing Codex config to be preserved" >&2; exit 1; }
 grep -q -- '\[mcp_servers.keturah\]' "$tmp/home/.codex/config.toml" \
   || { echo "expected active keturah MCP server config" >&2; exit 1; }
-grep -q -- 'command = "keturah-mcp"' "$tmp/home/.codex/config.toml" \
-  || { echo "expected keturah-mcp command in active config" >&2; exit 1; }
+grep -q -- "command = \"$tmp/bin/keturah-mcp\"" "$tmp/home/.codex/config.toml" \
+  || { echo "expected resolved keturah-mcp command in active config" >&2; exit 1; }
+grep -q -- '\[mcp_servers.keturah.tools."demo.list_tools"\]' "$tmp/home/.codex/config.toml" \
+  || { echo "expected demo.list_tools approval in active config" >&2; exit 1; }
+grep -q -- '\[mcp_servers.keturah.tools."demo.echo"\]' "$tmp/home/.codex/config.toml" \
+  || { echo "expected demo.echo approval in active config" >&2; exit 1; }
 grep -q -- '\[\[hooks.PostToolUse\]\]' "$tmp/home/.codex/config.toml" \
   || { echo "expected active Galeed hooks config" >&2; exit 1; }
 grep -q -- 'command = ".*galeed-codex-hook PostToolUse"' "$tmp/home/.codex/config.toml" \

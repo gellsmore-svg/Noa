@@ -122,19 +122,41 @@ build_family_wheelhouse() {
     || warn "no family library wheels built — fresh installs may fail to resolve galeed/keturah/cairn."
 }
 
+_wheelhouse_matches_lock() {
+  local root="$1" wheelhouse="$2" lock tool version src constraints
+  constraints="$wheelhouse/family-constraints.txt"
+  [ -s "$constraints" ] || return 1
+  lock="$(versions_lock "$root")"
+  while read -r tool version src; do
+    _is_family_lib "$tool" || continue
+    grep -qxF -- "$tool==$version" "$constraints" || return 1
+  done < <(grep -vE '^\s*#|^\s*$' "$lock")
+}
+
+_family_wheelhouse_pip_arg() {
+  local root="$1" wheelhouse="$2"
+  find "$wheelhouse" -maxdepth 1 -name '*.whl' -print -quit 2>/dev/null | grep -q . \
+    || return 1
+  if ! _wheelhouse_matches_lock "$root" "$wheelhouse"; then
+    warn "family wheelhouse at $wheelhouse is stale for $(versions_lock "$root") — ignoring cached wheels."
+    return 1
+  fi
+  printf '%s\n' "--find-links $wheelhouse --constraint $wheelhouse/family-constraints.txt"
+}
+
 # Install each tool pinned in the lock file via pipx (local path OR git tag).
 # hoglah gets the [cli] extra (the `hoglah` command needs typer). Family
 # libraries from the lock are built into a local wheelhouse so unpublished
 # dependencies resolve deterministically during pipx install.
 install_pinned_tools() {
   local root="$1" lock tool version src extra spec installed
-  local wheelhouse pip_args=()
+  local wheelhouse pip_arg pip_args=()
   require_cmd pipx "Install it: python -m pip install --user pipx && pipx ensurepath"
   lock="$(versions_lock "$root")"
   build_family_wheelhouse "$root"
   wheelhouse="$NOA_BUILT_WHEELHOUSE"
-  if find "$wheelhouse" -maxdepth 1 -name '*.whl' -print -quit | grep -q .; then
-    pip_args=(--pip-args "--find-links $wheelhouse --constraint $wheelhouse/family-constraints.txt")
+  if pip_arg="$(_family_wheelhouse_pip_arg "$root" "$wheelhouse")"; then
+    pip_args=(--pip-args "$pip_arg")
   fi
 
   # Pass 2: install the app tools.
@@ -214,15 +236,15 @@ inject_galeed() {
 # fastapi, uvicorn) come from PyPI.
 install_galeed_app() {
   local root="$1" lock raw version spec wheelhouse
-  local pip_args=()
+  local pip_arg pip_args=()
   lock="$(versions_lock "$root")"
   raw="$(grep -E '^galeed ' "$lock" | awk '{print $3}')"
   version="$(grep -E '^galeed ' "$lock" | awk '{print $2}')"
   spec="$(pip_spec "galeed" "[cli,web]" "$raw")" \
     || { warn "galeed source missing — the galeed debugger CLI will not be installed."; return 0; }
   wheelhouse="${NOA_BUILT_WHEELHOUSE:-${NOA_WHEELHOUSE:-$HOME/.cache/noa/wheelhouse}}"
-  if find "$wheelhouse" -maxdepth 1 -name '*.whl' -print -quit 2>/dev/null | grep -q .; then
-    pip_args=(--pip-args "--find-links $wheelhouse --constraint $wheelhouse/family-constraints.txt")
+  if pip_arg="$(_family_wheelhouse_pip_arg "$root" "$wheelhouse")"; then
+    pip_args=(--pip-args "$pip_arg")
   fi
   info "galeed $version [cli,web]  <-  $raw"
   pipx install --force ${pip_args[@]+"${pip_args[@]}"} "$spec" >/dev/null \
@@ -236,15 +258,15 @@ install_galeed_app() {
 # activated development venv. The wheelhouse resolves the local keturah wheel.
 install_keturah_app() {
   local root="$1" lock raw version spec wheelhouse
-  local pip_args=()
+  local pip_arg pip_args=()
   lock="$(versions_lock "$root")"
   raw="$(grep -E '^keturah ' "$lock" | awk '{print $3}')"
   version="$(grep -E '^keturah ' "$lock" | awk '{print $2}')"
   spec="$(pip_spec "keturah" "" "$raw")" \
     || { warn "keturah source missing — the Keturah MCP server will not be installed."; return 0; }
   wheelhouse="${NOA_BUILT_WHEELHOUSE:-${NOA_WHEELHOUSE:-$HOME/.cache/noa/wheelhouse}}"
-  if find "$wheelhouse" -maxdepth 1 -name '*.whl' -print -quit 2>/dev/null | grep -q .; then
-    pip_args=(--pip-args "--find-links $wheelhouse --constraint $wheelhouse/family-constraints.txt")
+  if pip_arg="$(_family_wheelhouse_pip_arg "$root" "$wheelhouse")"; then
+    pip_args=(--pip-args "$pip_arg")
   fi
   info "keturah $version  <-  $raw  (keturah-mcp)"
   pipx install --force ${pip_args[@]+"${pip_args[@]}"} "$spec" >/dev/null \
@@ -262,15 +284,15 @@ install_keturah_app() {
 # (fastapi, uvicorn) comes from PyPI.
 install_cairn_app() {
   local root="$1" lock raw version spec wheelhouse
-  local pip_args=()
+  local pip_arg pip_args=()
   lock="$(versions_lock "$root")"
   raw="$(grep -E '^cairn-lang ' "$lock" | awk '{print $3}')"
   version="$(grep -E '^cairn-lang ' "$lock" | awk '{print $2}')"
   spec="$(pip_spec "cairn-lang" "[web]" "$raw")" \
     || { warn "cairn-lang source missing — the cairn view composer will not be installed."; return 0; }
   wheelhouse="${NOA_BUILT_WHEELHOUSE:-${NOA_WHEELHOUSE:-$HOME/.cache/noa/wheelhouse}}"
-  if find "$wheelhouse" -maxdepth 1 -name '*.whl' -print -quit 2>/dev/null | grep -q .; then
-    pip_args=(--pip-args "--find-links $wheelhouse --constraint $wheelhouse/family-constraints.txt")
+  if pip_arg="$(_family_wheelhouse_pip_arg "$root" "$wheelhouse")"; then
+    pip_args=(--pip-args "$pip_arg")
   fi
   info "cairn-lang $version [web]  <-  $raw  (cairn-serve composer)"
   pipx install --force ${pip_args[@]+"${pip_args[@]}"} "$spec" >/dev/null \
@@ -425,16 +447,39 @@ run_migrations() {
   fi
 }
 
+_resolve_console_script() {
+  local app="$1" script="$2" resolved pipx_path
+  resolved="$(command -v "$script" 2>/dev/null || true)"
+  if [ -n "$resolved" ]; then
+    printf '%s\n' "$resolved"
+    return 0
+  fi
+  pipx_path="$HOME/.local/share/pipx/venvs/$app/bin/$script"
+  if [ -x "$pipx_path" ]; then
+    printf '%s\n' "$pipx_path"
+    return 0
+  fi
+  printf '%s\n' "$script"
+}
+
 _codex_family_integration_block() {
-  local hook e
-  hook="$(command -v galeed-codex-hook 2>/dev/null || echo galeed-codex-hook)"
+  local hook keturah e
+  keturah="$(_resolve_console_script keturah keturah-mcp)"
+  hook="$(_resolve_console_script galeed galeed-codex-hook)"
   printf '# BEGIN Noa family Codex integration
 '
   printf '[mcp_servers.keturah]
 '
-  printf 'command = "keturah-mcp"
-'
+  printf 'command = "%s"
+' "$keturah"
   printf 'env = { "PYTHONUNBUFFERED" = "1" }
+
+'
+  printf '[mcp_servers.keturah.tools."demo.list_tools"]
+approval_mode = "approve"
+
+[mcp_servers.keturah.tools."demo.echo"]
+approval_mode = "approve"
 
 '
   for e in SessionStart PreToolUse PostToolUse PermissionRequest UserPromptSubmit \
@@ -487,6 +532,12 @@ render_mcp_server_config() {
 command = "keturah-mcp"
 # args = ["--name", "keturah-family"]   # optional
 env = { "PYTHONUNBUFFERED" = "1" }
+
+[mcp_servers.keturah.tools."demo.list_tools"]
+approval_mode = "approve"
+
+[mcp_servers.keturah.tools."demo.echo"]
+approval_mode = "approve"
 
 [[hooks.SessionStart]]
 [[hooks.SessionStart.hooks]]
