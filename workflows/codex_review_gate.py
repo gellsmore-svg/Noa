@@ -45,7 +45,7 @@ OUTPUT_SCHEMA: dict[str, Any] = {
                     "status": {"type": "string", "enum": ["passed", "failed", "not_run"]},
                     "notes": {"type": "string"},
                 },
-                "required": ["command", "status"],
+                "required": ["command", "status", "notes"],
             },
         },
         "risk": {"type": "string", "enum": ["low", "medium", "high"]},
@@ -193,6 +193,11 @@ def parse_codex_json_stream(stdout: str, returncode: int) -> CodexRun:
     return CodexRun(summary=summary, events=events, errors=errors, returncode=returncode)
 
 
+def codex_stderr_errors(stderr: str) -> list[str]:
+    benign = {"Reading additional input from stdin..."}
+    return [line for line in (part.strip() for part in stderr.splitlines()) if line and line not in benign]
+
+
 def build_codex_prompt(request: str) -> str:
     return (
         "You are running under Noa's Cairn review gate. Complete the requested "
@@ -226,8 +231,7 @@ def run_codex(args: argparse.Namespace, schema_path: Path) -> CodexRun:
     except OSError as error:
         return CodexRun(summary=None, events=[], errors=[str(error)], returncode=127)
     parsed = parse_codex_json_stream(completed.stdout, completed.returncode)
-    if completed.stderr.strip():
-        parsed.errors.append(completed.stderr.strip())
+    parsed.errors.extend(codex_stderr_errors(completed.stderr))
     return parsed
 
 
