@@ -426,25 +426,29 @@ run_migrations() {
 }
 
 _codex_family_integration_block() {
-  cat <<'TOML'
-# BEGIN Noa family Codex integration
-[mcp_servers.keturah]
-command = "keturah-mcp"
-env = { "PYTHONUNBUFFERED" = "1" }
+  local hook e
+  hook="$(command -v galeed-codex-hook 2>/dev/null || echo galeed-codex-hook)"
+  printf '# BEGIN Noa family Codex integration
+'
+  printf '[mcp_servers.keturah]
+'
+  printf 'command = "keturah-mcp"
+'
+  printf 'env = { "PYTHONUNBUFFERED" = "1" }
 
-[hooks]
-SessionStart = ["galeed-codex-hook", "SessionStart"]
-PreToolUse = ["galeed-codex-hook", "PreToolUse"]
-PostToolUse = ["galeed-codex-hook", "PostToolUse"]
-PermissionRequest = ["galeed-codex-hook", "PermissionRequest"]
-UserPromptSubmit = ["galeed-codex-hook", "UserPromptSubmit"]
-Stop = ["galeed-codex-hook", "Stop"]
-PreCompact = ["galeed-codex-hook", "PreCompact"]
-PostCompact = ["galeed-codex-hook", "PostCompact"]
-SubagentStart = ["galeed-codex-hook", "SubagentStart"]
-SubagentStop = ["galeed-codex-hook", "SubagentStop"]
-# END Noa family Codex integration
-TOML
+'
+  for e in SessionStart PreToolUse PostToolUse PermissionRequest UserPromptSubmit \
+           Stop PreCompact PostCompact SubagentStart SubagentStop; do
+    printf '[[hooks.%s]]
+[[hooks.%s.hooks]]
+type = "command"
+command = "%s %s"
+
+' \
+      "$e" "$e" "$hook" "$e"
+  done
+  printf '# END Noa family Codex integration
+'
 }
 
 _write_managed_codex_config() {
@@ -484,17 +488,46 @@ command = "keturah-mcp"
 # args = ["--name", "keturah-family"]   # optional
 env = { "PYTHONUNBUFFERED" = "1" }
 
-[hooks]
-SessionStart = ["galeed-codex-hook", "SessionStart"]
-PreToolUse = ["galeed-codex-hook", "PreToolUse"]
-PostToolUse = ["galeed-codex-hook", "PostToolUse"]
-PermissionRequest = ["galeed-codex-hook", "PermissionRequest"]
-UserPromptSubmit = ["galeed-codex-hook", "UserPromptSubmit"]
-Stop = ["galeed-codex-hook", "Stop"]
-PreCompact = ["galeed-codex-hook", "PreCompact"]
-PostCompact = ["galeed-codex-hook", "PostCompact"]
-SubagentStart = ["galeed-codex-hook", "SubagentStart"]
-SubagentStop = ["galeed-codex-hook", "SubagentStop"]
+[[hooks.SessionStart]]
+[[hooks.SessionStart.hooks]]
+type = "command"
+command = "galeed-codex-hook SessionStart"
+[[hooks.PreToolUse]]
+[[hooks.PreToolUse.hooks]]
+type = "command"
+command = "galeed-codex-hook PreToolUse"
+[[hooks.PostToolUse]]
+[[hooks.PostToolUse.hooks]]
+type = "command"
+command = "galeed-codex-hook PostToolUse"
+[[hooks.PermissionRequest]]
+[[hooks.PermissionRequest.hooks]]
+type = "command"
+command = "galeed-codex-hook PermissionRequest"
+[[hooks.UserPromptSubmit]]
+[[hooks.UserPromptSubmit.hooks]]
+type = "command"
+command = "galeed-codex-hook UserPromptSubmit"
+[[hooks.Stop]]
+[[hooks.Stop.hooks]]
+type = "command"
+command = "galeed-codex-hook Stop"
+[[hooks.PreCompact]]
+[[hooks.PreCompact.hooks]]
+type = "command"
+command = "galeed-codex-hook PreCompact"
+[[hooks.PostCompact]]
+[[hooks.PostCompact.hooks]]
+type = "command"
+command = "galeed-codex-hook PostCompact"
+[[hooks.SubagentStart]]
+[[hooks.SubagentStart.hooks]]
+type = "command"
+command = "galeed-codex-hook SubagentStart"
+[[hooks.SubagentStop]]
+[[hooks.SubagentStop.hooks]]
+type = "command"
+command = "galeed-codex-hook SubagentStop"
 TOML
 
   _write_managed_codex_config "$codex_config" \

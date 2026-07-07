@@ -159,9 +159,9 @@ grep -q -- '\[mcp_servers.keturah\]' "$tmp/home/.codex/config.toml" \
   || { echo "expected active keturah MCP server config" >&2; exit 1; }
 grep -q -- 'command = "keturah-mcp"' "$tmp/home/.codex/config.toml" \
   || { echo "expected keturah-mcp command in active config" >&2; exit 1; }
-grep -q -- '\[hooks\]' "$tmp/home/.codex/config.toml" \
+grep -q -- '\[\[hooks.PostToolUse\]\]' "$tmp/home/.codex/config.toml" \
   || { echo "expected active Galeed hooks config" >&2; exit 1; }
-grep -q -- 'PostToolUse = \["galeed-codex-hook", "PostToolUse"\]' "$tmp/home/.codex/config.toml" \
+grep -q -- 'command = ".*galeed-codex-hook PostToolUse"' "$tmp/home/.codex/config.toml" \
   || { echo "expected Galeed PostToolUse hook" >&2; exit 1; }
 [ "$(grep -c '^# BEGIN Noa family Codex integration$' "$tmp/home/.codex/config.toml")" = "1" ] \
   || { echo "expected exactly one managed Codex integration block" >&2; exit 1; }
