@@ -44,8 +44,17 @@ if [ -n "$TRACE_ID" ] && [ -n "$SESSION_ID" ]; then
 fi
 
 command -v galeed >/dev/null || { echo "galeed not on PATH - run install/install.sh first." >&2; exit 1; }
-command -v cairn-galeed-observe >/dev/null \
-  || { echo "cairn-galeed-observe not on PATH - run install/install.sh first." >&2; exit 1; }
+CAIRN_GALEED_OBSERVE="${CAIRN_GALEED_OBSERVE:-}"
+if [ -z "$CAIRN_GALEED_OBSERVE" ]; then
+  if command -v cairn-galeed-observe >/dev/null; then
+    CAIRN_GALEED_OBSERVE="$(command -v cairn-galeed-observe)"
+  elif [ -x "$HOME/domains/Cairn/.venv/bin/cairn-galeed-observe" ]; then
+    CAIRN_GALEED_OBSERVE="$HOME/domains/Cairn/.venv/bin/cairn-galeed-observe"
+  else
+    echo "cairn-galeed-observe not on PATH - run install/install.sh first." >&2
+    exit 1
+  fi
+fi
 
 MONGO_URI="${HOGLAH_GALEED_MONGO_URI:-${TIRZAH_MONGO_URI:-${MONGO_URI:-mongodb://localhost:27017}}}"
 MONGO_DB="${HOGLAH_GALEED_MONGO_DB:-${TIRZAH_MONGO_DB:-mnemosyne_dev}}"
@@ -71,7 +80,7 @@ galeed events "${filter_args[@]}" --limit "$LIMIT" --json \
   --mongo-uri "$MONGO_URI" --mongo-db "$MONGO_DB" > "$events_json"
 
 echo "==> 2/2  Analyse with Cairn"
-cairn-galeed-observe "$events_json" \
+"$CAIRN_GALEED_OBSERVE" "$events_json" \
   --title "$TITLE" \
   --observations-output "$observations_jsonl" \
   --output "$report_md"

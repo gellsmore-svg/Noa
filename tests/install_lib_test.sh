@@ -270,6 +270,14 @@ test -s "$observer_out/trace-trace_demo-cairn-report.md" \
 
 echo "live_observer workflow command chain: pass"
 
+rm -f "$tmp/bin/cairn-galeed-observe" "$tmp/cairn.args"
+PATH="$tmp/bin:$PATH" MOCK_GALEED_ARGS="$tmp/galeed.args" MOCK_CAIRN_ARGS="$tmp/cairn.args" \
+  CAIRN_GALEED_OBSERVE="$tmp/bin/missing-cairn-observe" \
+  "$ROOT/workflows/live_observer.sh" --session sess_demo --out-dir "$observer_out/override" >/dev/null 2>&1 \
+  && { echo "expected invalid CAIRN_GALEED_OBSERVE override to fail" >&2; exit 1; }
+
+echo "live_observer workflow invalid override: pass"
+
 # The Codex integration writes a real config.toml, preserves existing user
 # settings, and remains idempotent across repeated install/upgrade runs.
 cat > "$tmp/bin/galeed-codex-hook" <<'SH'
