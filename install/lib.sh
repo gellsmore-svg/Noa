@@ -207,6 +207,29 @@ inject_hoglah_into_tirzah() {
     || warn "hoglah inject into tirzah failed — its hoglah adapter will error."
 }
 
+# Keturah is the family MCP server. Inject Tirzah into Keturah's pipx venv so
+# `keturah-mcp` can import Tirzah's manifest + read-only memory handlers instead
+# of falling back to the demo-only registry.
+inject_tirzah_into_keturah() {
+  local root="$1" lock raw spec wheelhouse
+  local pip_arg pip_args=()
+  pipx list 2>/dev/null | grep -q "package keturah" || return 0
+  lock="$(versions_lock "$root")"
+  raw="$(grep -E '^tirzah ' "$lock" | awk '{print $3}')"
+  spec="$(pip_spec "tirzah" "" "$raw")" \
+    || { warn "tirzah source missing — keturah-mcp will expose only non-Tirzah tools."; return 0; }
+  if [ -z "${NOA_BUILT_WHEELHOUSE:-}" ]; then
+    build_family_wheelhouse "$root"
+  fi
+  wheelhouse="${NOA_BUILT_WHEELHOUSE:-${NOA_WHEELHOUSE:-$HOME/.cache/noa/wheelhouse}}"
+  if pip_arg="$(_family_wheelhouse_pip_arg "$root" "$wheelhouse")"; then
+    pip_args=(--pip-args "$pip_arg")
+  fi
+  info "inject tirzah into keturah (MCP memory tools)"
+  pipx inject --force keturah ${pip_args[@]+"${pip_args[@]}"} "$spec" >/dev/null 2>&1 \
+    || warn "tirzah inject into keturah failed — keturah-mcp will expose only demo/fallback tools."
+}
+
 # The trace spine: galeed is a library (not on PyPI, no console app), so it is
 # injected into each tool's isolated pipx env from the lock source. Hoglah also
 # gets pymongo (its core is Mongo-free) so job events persist rather than being
@@ -464,21 +487,35 @@ _resolve_console_script() {
 
 _codex_family_integration_block() {
   local hook keturah e
+  local tirzah_mongo_uri tirzah_mongo_db mahalath_mongo_uri mahalath_mongo_db tirzah_config
   keturah="$(_resolve_console_script keturah keturah-mcp)"
   hook="$(_resolve_console_script galeed galeed-codex-hook)"
+  tirzah_mongo_uri="${TIRZAH_MONGO_URI:-mongodb://localhost:27017}"
+  tirzah_mongo_db="${TIRZAH_MONGO_DB:-mnemosyne_dev}"
+  mahalath_mongo_uri="${MAHALATH_MONGO_URI:-mongodb://localhost:27017}"
+  mahalath_mongo_db="${MAHALATH_MONGO_DB:-mahalath_dev}"
+  tirzah_config="${TIRZAH_CONFIG:-}"
   printf '# BEGIN Noa family Codex integration
 '
   printf '[mcp_servers.keturah]
 '
   printf 'command = "%s"
 ' "$keturah"
-  printf 'env = { "PYTHONUNBUFFERED" = "1" }
+  printf 'env = { "PYTHONUNBUFFERED" = "1", "TIRZAH_MONGO_URI" = "%s", "TIRZAH_MONGO_DB" = "%s", "MAHALATH_MONGO_URI" = "%s", "MAHALATH_MONGO_DB" = "%s"' \
+    "$tirzah_mongo_uri" "$tirzah_mongo_db" "$mahalath_mongo_uri" "$mahalath_mongo_db"
+  if [ -n "$tirzah_config" ]; then
+    printf ', "TIRZAH_CONFIG" = "%s"' "$tirzah_config"
+  fi
+  printf ' }
 
 '
   printf '[mcp_servers.keturah.tools."demo.list_tools"]
 approval_mode = "approve"
 
 [mcp_servers.keturah.tools."demo.echo"]
+approval_mode = "approve"
+
+[mcp_servers.keturah.tools."tirzah.search_memory"]
 approval_mode = "approve"
 
 '
@@ -531,12 +568,22 @@ render_mcp_server_config() {
 [mcp_servers.keturah]
 command = "keturah-mcp"
 # args = ["--name", "keturah-family"]   # optional
-env = { "PYTHONUNBUFFERED" = "1" }
+env = {
+  "PYTHONUNBUFFERED" = "1",
+  "TIRZAH_MONGO_URI" = "mongodb://localhost:27017",
+  "TIRZAH_MONGO_DB" = "mnemosyne_dev",
+  "MAHALATH_MONGO_URI" = "mongodb://localhost:27017",
+  "MAHALATH_MONGO_DB" = "mahalath_dev",
+  # "TIRZAH_CONFIG" = "/home/you/ai-stack/config/tirzah.config.yaml",
+}
 
 [mcp_servers.keturah.tools."demo.list_tools"]
 approval_mode = "approve"
 
 [mcp_servers.keturah.tools."demo.echo"]
+approval_mode = "approve"
+
+[mcp_servers.keturah.tools."tirzah.search_memory"]
 approval_mode = "approve"
 
 [[hooks.SessionStart]]

@@ -49,6 +49,7 @@ install_pinned_tools "$ROOT"
 inject_galeed "$ROOT"   # pipx --force reinstall wipes injected packages
 install_galeed_app "$ROOT"
 install_keturah_app "$ROOT"
+inject_tirzah_into_keturah "$ROOT"
 install_cairn_app "$ROOT"
 inject_mahalath_into_tirzah "$ROOT"
 inject_hoglah_into_tirzah "$ROOT"

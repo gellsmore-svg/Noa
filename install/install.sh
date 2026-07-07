@@ -32,6 +32,7 @@ log "3/4  Real adapters (Hoglah worker + Tirzah<-Mahalath seam + Galeed spine)"
 inject_galeed "$ROOT"
 install_galeed_app "$ROOT"
 install_keturah_app "$ROOT"
+inject_tirzah_into_keturah "$ROOT"
 install_cairn_app "$ROOT"
 start_hoglah_worker
 inject_mahalath_into_tirzah "$ROOT"
