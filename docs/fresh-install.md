@@ -1,7 +1,7 @@
 # Fresh install — a new machine or a new user
 
 Stand the stack up from scratch, with no access to the developer's local repos
-(the tools install from their **public git tags**). ~20 lines of commands.
+(the tools install from their **public git refs**). ~20 lines of commands.
 
 ## Host prerequisites (already present, shared)
 - **Docker** (with the compose plugin) and permission to use it (the `docker` group).
@@ -31,7 +31,7 @@ Stand the stack up from scratch, with no access to the developer's local repos
      MAHALATH_MONGO_URI=mongodb://localhost:27018
      TIRZAH_MONGO_URI=mongodb://localhost:27018
      ```
-3. **Install** from the public git tags (no dev-repo access needed):
+3. **Install** from the public git refs (no dev-repo access needed):
    ```bash
    VERSIONS_LOCK=versions.git.lock ./install/install.sh
    ```

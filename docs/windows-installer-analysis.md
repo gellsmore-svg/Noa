@@ -34,7 +34,7 @@ From `Noa/README.md`, `install/`, `versions.lock`, `health/healthcheck.sh`, and 
 
 - **Mongo**: Docker Compose (`compose.yaml`).
 - **Ollama**: Always external (host), configured by `OLLAMA_BASE_URL`.
-- **Tools**: Installed via `pipx` from pinned versions (local paths or git tags via `versions.*.lock`).
+- **Tools**: Installed via `pipx` from pinned versions (local paths or git refs via `versions.*.lock`).
 - **Family libs** (Galeed, Keturah, Cairn-lang): Pre-installed into tool venvs (never pipx-installed as top-level apps).
 - **Hoglah worker**: systemd user service (template in `services/`) or background pidfile fallback.
 - **Config**: Single `.env` + per-tool `config.yaml` (or equivalent). Shared queue dir.

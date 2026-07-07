@@ -1,8 +1,12 @@
-# Public git-tag pins — for a FRESH machine that can't see the local repos.
+# Public git-ref pins — for a FRESH machine that can't see the local repos.
 # Use with:  VERSIONS_LOCK=versions.git.lock ./install/install.sh
 # (Noa itself is private; only its scripts are needed locally.)
 #
 # tool      version   source
 mahalath    1.1.0     git+https://github.com/gellsmore-svg/mahalath@v1.1.0
-tirzah      1.3.0     git+https://github.com/gellsmore-svg/tirzah@v1.3.0
+tirzah      1.11.0    git+https://github.com/gellsmore-svg/tirzah@4ddc58b60f42
 hoglah      0.8.0     git+https://github.com/gellsmore-svg/hoglah@v0.8.0
+galeed      0.2.0     git+https://github.com/gellsmore-svg/galeed@b4b8961499e1
+keturah     0.2.0     git+https://github.com/gellsmore-svg/keturah@850a51e833da
+cairn-lang  0.8.0     git+https://github.com/gellsmore-svg/Cairn@c9fff1da8d0c
+milcah      0.2.0     git+https://github.com/gellsmore-svg/Milcah@d443f13ac992

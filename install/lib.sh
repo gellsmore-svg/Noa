@@ -58,7 +58,7 @@ start_mongo() {
 }
 
 # The lock file to install from. Defaults to versions.lock (local source paths);
-# override with VERSIONS_LOCK=versions.git.lock for a fresh machine (public git tags).
+# override with VERSIONS_LOCK=versions.git.lock for a fresh machine (public git refs).
 versions_lock() {
   echo "${VERSIONS_LOCK:-$1/versions.lock}"
 }
@@ -144,7 +144,7 @@ _family_wheelhouse_pip_arg() {
   printf '%s\n' "--find-links $wheelhouse --constraint $wheelhouse/family-constraints.txt"
 }
 
-# Install each tool pinned in the lock file via pipx (local path OR git tag).
+# Install each tool pinned in the lock file via pipx (local path OR git ref).
 # hoglah gets the [cli] extra (the `hoglah` command needs typer). Family
 # libraries from the lock are built into a local wheelhouse so unpublished
 # dependencies resolve deterministically during pipx install.
