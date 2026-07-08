@@ -11,6 +11,7 @@ SESSION_ID=""
 LIMIT="${NOA_OBSERVER_LIMIT:-200}"
 TITLE="Noa live observer"
 OUT_DIR="${NOA_OBSERVER_OUT_DIR:-$ROOT/reports/live-observer}"
+ALLOW_EMPTY=false
 
 usage() {
   cat <<'EOF'
@@ -22,6 +23,7 @@ Options:
   --limit N        Max events to export from Galeed. Default: 200.
   --title TEXT     Report title. Default: "Noa live observer".
   --out-dir DIR    Output directory. Default: reports/live-observer.
+  --allow-empty    Produce an empty report when Galeed returns no events.
   -h, --help       Show this help.
 EOF
 }
@@ -33,6 +35,7 @@ while [ "$#" -gt 0 ]; do
     --limit) LIMIT="${2:-}"; shift 2 ;;
     --title) TITLE="${2:-}"; shift 2 ;;
     --out-dir) OUT_DIR="${2:-}"; shift 2 ;;
+    --allow-empty) ALLOW_EMPTY=true; shift ;;
     -h|--help) usage; exit 0 ;;
     *) echo "unknown argument: $1" >&2; usage >&2; exit 2 ;;
   esac
@@ -78,6 +81,27 @@ report_md="$OUT_DIR/${safe_label}-cairn-report.md"
 echo "==> 1/2  Export Galeed events from $MONGO_DB"
 galeed events "${filter_args[@]}" --limit "$LIMIT" --json \
   --mongo-uri "$MONGO_URI" --mongo-db "$MONGO_DB" > "$events_json"
+event_count="$(python3 - "$events_json" <<'PY'
+import json
+import sys
+from pathlib import Path
+
+text = Path(sys.argv[1]).read_text(encoding="utf-8").strip()
+if not text:
+    print(0)
+    raise SystemExit
+try:
+    data = json.loads(text)
+except json.JSONDecodeError:
+    print(sum(1 for line in text.splitlines() if line.strip()))
+else:
+    print(len(data) if isinstance(data, list) else 1)
+PY
+)"
+if [ "$event_count" -eq 0 ] && [ "$ALLOW_EMPTY" != "true" ]; then
+  echo "Galeed export contains no events; use --allow-empty to produce an empty report." >&2
+  exit 3
+fi
 
 echo "==> 2/2  Analyse with Cairn"
 "$CAIRN_GALEED_OBSERVE" "$events_json" \

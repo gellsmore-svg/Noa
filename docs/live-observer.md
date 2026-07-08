@@ -32,6 +32,9 @@ The workflow writes three files under `reports/live-observer/`:
 See `docs/examples/hoglah-live-observer-sample.md` for a real local Hoglah
 session report that surfaced queue vigilance load and long queue lifecycles.
 
+If the Galeed export contains no events, the workflow fails by default. Use
+`--allow-empty` only for smoke tests or deliberate empty-baseline reports.
+
 This lets a running stack answer the practical questions:
 
 - where did the system wait, fail, retry, or ask the user to repair context?

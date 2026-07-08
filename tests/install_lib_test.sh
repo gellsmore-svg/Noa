@@ -228,6 +228,10 @@ echo "live_observer workflow syntax: pass"
 cat > "$tmp/bin/galeed" <<'SH'
 #!/usr/bin/env bash
 printf '%s\n' "$*" > "$MOCK_GALEED_ARGS"
+if [ "${MOCK_GALEED_EMPTY:-}" = "1" ]; then
+  echo "[]"
+  exit 0
+fi
 cat <<'JSON'
 [{"trace_id":"trace_demo","session_id":"sess_demo","type":"llm.call.completed","summary":"demo","metadata":{"missing_evidence":true}}]
 JSON
@@ -277,6 +281,20 @@ PATH="$tmp/bin:$PATH" MOCK_GALEED_ARGS="$tmp/galeed.args" MOCK_CAIRN_ARGS="$tmp/
   && { echo "expected invalid CAIRN_GALEED_OBSERVE override to fail" >&2; exit 1; }
 
 echo "live_observer workflow invalid override: pass"
+
+if PATH="$tmp/bin:$PATH" MOCK_GALEED_ARGS="$tmp/galeed.args" MOCK_CAIRN_ARGS="$tmp/cairn.args" \
+  MOCK_GALEED_EMPTY=1 "$ROOT/workflows/live_observer.sh" --trace empty --out-dir "$observer_out/empty" \
+  >/dev/null 2>"$tmp/empty.err"; then
+  echo "expected empty Galeed export to fail without --allow-empty" >&2
+  exit 1
+fi
+grep -q 'Galeed export contains no events' "$tmp/empty.err" \
+  || { echo "expected empty export diagnostic" >&2; exit 1; }
+PATH="$tmp/bin:$PATH" MOCK_GALEED_ARGS="$tmp/galeed.args" MOCK_CAIRN_ARGS="$tmp/cairn.args" \
+  MOCK_GALEED_EMPTY=1 "$ROOT/workflows/live_observer.sh" --trace empty --allow-empty \
+  --out-dir "$observer_out/empty-allowed" >/dev/null
+
+echo "live_observer workflow empty export guard: pass"
 
 cat > "$tmp/bin/curl" <<'SH'
 #!/usr/bin/env bash
