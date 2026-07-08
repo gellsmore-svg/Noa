@@ -344,6 +344,33 @@ test ! -e "$index_root/issue-drafts/system-reliability-long-queue-lifecycle.md" 
 
 echo "live_observer issue draft workflow: pass"
 
+"$ROOT/workflows/live_observer_publish_issues.py" \
+  --draft-dir "$index_root/issue-drafts" \
+  --repo gellsmore-svg/Noa > "$tmp/publish-dry-run.out"
+grep -q "Dry run: gh issue create" "$tmp/publish-dry-run.out" \
+  || { echo "expected dry-run GitHub issue command" >&2; exit 1; }
+grep -q -- "--repo gellsmore-svg/Noa" "$tmp/publish-dry-run.out" \
+  || { echo "expected repo in dry-run command" >&2; exit 1; }
+
+cat > "$tmp/bin/gh" <<'SH'
+#!/usr/bin/env bash
+echo "$@" >> "${MOCK_GH_LOG:-/dev/null}"
+exit 0
+SH
+chmod +x "$tmp/bin/gh"
+: > "$tmp/gh.log"
+PATH="$tmp/bin:$PATH" MOCK_GH_LOG="$tmp/gh.log" \
+  "$ROOT/workflows/live_observer_publish_issues.py" \
+  --draft-dir "$index_root/issue-drafts" \
+  --repo gellsmore-svg/Noa \
+  --apply >/dev/null
+grep -q "issue create --title Live observer: human_load: queue vigilance load" "$tmp/gh.log" \
+  || { echo "expected gh issue create invocation" >&2; exit 1; }
+grep -q -- "--label cairn" "$tmp/gh.log" \
+  || { echo "expected issue labels" >&2; exit 1; }
+
+echo "live_observer issue publish workflow: pass"
+
 rm -f "$tmp/bin/cairn-galeed-observe" "$tmp/cairn.args"
 PATH="$tmp/bin:$PATH" MOCK_GALEED_ARGS="$tmp/galeed.args" MOCK_CAIRN_ARGS="$tmp/cairn.args" \
   CAIRN_GALEED_OBSERVE="$tmp/bin/missing-cairn-observe" \

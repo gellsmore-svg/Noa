@@ -41,6 +41,8 @@ environment, separate from any dev checkout or virtualenv.
   scheduled observer reports so repeated findings are visible.
 - `workflows/live_observer_issue_drafts.py` — writes local GitHub-ready Markdown
   issue drafts for repeated, high-enough-risk findings.
+- `workflows/live_observer_publish_issues.py` — dry-runs or explicitly publishes
+  those drafts through the GitHub CLI.
 - `docs/` — the **[readiness & integration report](docs/STACK-READINESS-REPORT.md)**
   (the full plan), plus runtime/change-management notes.
 

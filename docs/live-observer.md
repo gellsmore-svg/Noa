@@ -90,6 +90,17 @@ To rebuild issue drafts from an existing index:
 
 The drafter only writes Markdown files locally. It does not create GitHub issues.
 
+To preview GitHub issue creation commands:
+
+```bash
+./workflows/live_observer_publish_issues.py \
+  --draft-dir reports/live-observer/scheduled/issue-drafts \
+  --repo gellsmore-svg/Noa
+```
+
+To actually create issues, add `--apply`. This uses the GitHub CLI (`gh`) and is
+the only workflow here that mutates GitHub.
+
 This lets a running stack answer the practical questions:
 
 - where did the system wait, fail, retry, or ask the user to repair context?
