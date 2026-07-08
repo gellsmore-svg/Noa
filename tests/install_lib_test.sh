@@ -278,6 +278,43 @@ PATH="$tmp/bin:$PATH" MOCK_GALEED_ARGS="$tmp/galeed.args" MOCK_CAIRN_ARGS="$tmp/
 
 echo "live_observer workflow invalid override: pass"
 
+cat > "$tmp/bin/curl" <<'SH'
+#!/usr/bin/env bash
+exit 0
+SH
+cat > "$tmp/bin/mongosh" <<'SH'
+#!/usr/bin/env bash
+exit 0
+SH
+cat > "$tmp/bin/systemctl" <<'SH'
+#!/usr/bin/env bash
+[ "$1" = "--user" ] && [ "$2" = "is-active" ] && [ "$3" = "hoglah-worker.service" ] && exit 0
+exit 1
+SH
+for tool in mahalath tirzah hoglah milcah galeed; do
+  cat > "$tmp/bin/$tool" <<SH
+#!/usr/bin/env bash
+echo "$tool 0.test"
+SH
+done
+cat > "$tmp/bin/cairn-galeed-observe" <<'SH'
+#!/usr/bin/env bash
+if [ "${1:-}" = "--help" ]; then
+  echo "usage: cairn-galeed-observe"
+  exit 0
+fi
+exit 2
+SH
+chmod +x "$tmp/bin"/curl "$tmp/bin"/mongosh "$tmp/bin"/systemctl \
+  "$tmp/bin"/mahalath "$tmp/bin"/tirzah "$tmp/bin"/hoglah "$tmp/bin"/milcah \
+  "$tmp/bin"/galeed "$tmp/bin"/cairn-galeed-observe
+
+health_out="$(PATH="$tmp/bin:$PATH" "$ROOT/health/healthcheck.sh")"
+printf '%s' "$health_out" | grep -q 'cairn-galeed-observe: usage: cairn-galeed-observe' \
+  || { echo "expected healthcheck to fall back to --help for cairn-galeed-observe" >&2; exit 1; }
+
+echo "healthcheck CLI label fallback: pass"
+
 # The Codex integration writes a real config.toml, preserves existing user
 # settings, and remains idempotent across repeated install/upgrade runs.
 cat > "$tmp/bin/galeed-codex-hook" <<'SH'

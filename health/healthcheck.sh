@@ -14,6 +14,14 @@ HOGLAH_QUEUE_DIR="${HOGLAH_QUEUE_DIR:-$HOME/ai-stack/hoglah}"
 fail=0
 ok()   { printf '  ok   %s\n' "$1"; }
 bad()  { printf '  FAIL %s\n' "$1"; fail=1; }
+tool_label() {
+  local tool="$1" label
+  label="$("$tool" --version 2>/dev/null | head -1 || true)"
+  if [ -z "$label" ]; then
+    label="$("$tool" --help 2>/dev/null | head -1 || true)"
+  fi
+  printf '%s' "${label:-installed}"
+}
 
 echo "Noa healthcheck"
 
@@ -52,7 +60,7 @@ fi
 # CLIs on PATH
 for tool in mahalath tirzah hoglah milcah galeed cairn-galeed-observe; do
   if command -v "$tool" >/dev/null 2>&1; then
-    ok "$tool: $("$tool" --version 2>/dev/null | head -1)"
+    ok "$tool: $(tool_label "$tool")"
   else
     bad "$tool not on PATH (pipx install pending?)"
   fi
