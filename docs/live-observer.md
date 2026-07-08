@@ -55,6 +55,7 @@ After each scheduled run it refreshes:
 
 - `index.md` - operator-readable rollup of reports, event totals, risk, and repeated findings.
 - `index.json` - machine-readable report summaries for future dashboards or issue creation.
+- `issue-drafts/*.md` - local GitHub-ready drafts for findings that cross the configured thresholds.
 
 Set these `.env` keys to tune it:
 
@@ -63,6 +64,8 @@ Set these `.env` keys to tune it:
 - `NOA_OBSERVER_LIMIT` - event export limit, default `200`.
 - `NOA_OBSERVER_TRACE_ID` or `NOA_OBSERVER_SESSION_ID` - optional filter.
 - `NOA_OBSERVER_ALLOW_EMPTY` - set `true` only for deliberate empty baselines.
+- `NOA_OBSERVER_ISSUE_MIN_COUNT` - repeated-report threshold for local issue drafts, default `2`.
+- `NOA_OBSERVER_ISSUE_MIN_RISK` - minimum highest observed risk for local issue drafts, default `moderate`.
 
 On native Linux, `install/install.sh` renders and enables:
 
@@ -77,6 +80,15 @@ To rebuild the index without running a new observation:
 ```bash
 ./workflows/live_observer_index.py --root reports/live-observer/scheduled
 ```
+
+To rebuild issue drafts from an existing index:
+
+```bash
+./workflows/live_observer_issue_drafts.py \
+  --index reports/live-observer/scheduled/index.json
+```
+
+The drafter only writes Markdown files locally. It does not create GitHub issues.
 
 This lets a running stack answer the practical questions:
 

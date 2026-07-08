@@ -39,6 +39,8 @@ environment, separate from any dev checkout or virtualenv.
   native Linux.
 - `workflows/live_observer_index.py` — builds `index.md` / `index.json` over
   scheduled observer reports so repeated findings are visible.
+- `workflows/live_observer_issue_drafts.py` — writes local GitHub-ready Markdown
+  issue drafts for repeated, high-enough-risk findings.
 - `docs/` — the **[readiness & integration report](docs/STACK-READINESS-REPORT.md)**
   (the full plan), plus runtime/change-management notes.
 

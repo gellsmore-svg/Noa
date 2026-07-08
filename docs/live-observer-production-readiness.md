@@ -27,6 +27,7 @@ The reproducible fresh-machine lock is `versions.git.lock`.
 - Noa's live observer fails on an empty Galeed export by default, with `--allow-empty` reserved for deliberate baseline tests.
 - Noa's scheduled observer wrapper writes timestamped report directories.
 - Noa's scheduled observer refreshes Markdown and JSON indexes over repeated findings.
+- Noa drafts local GitHub-ready issue Markdown when findings cross repeat/risk thresholds.
 - On native Linux, `install/install.sh` renders and enables a systemd user timer for scheduled observer runs.
 - Noa can fall back to a local Cairn virtualenv when `cairn-galeed-observe` is not on `PATH`.
 - Cairn live-observer CLIs now return clean errors for invalid input and output-write failures.
@@ -60,6 +61,7 @@ Observed output:
 - Running an operator-triggered live observer workflow against local Galeed traces.
 - Running scheduled observer reports through a native Linux systemd user timer, or manually through `workflows/live_observer_scheduled.sh`.
 - Reviewing repeated live-observer findings through `index.md` and `index.json`.
+- Drafting local issue files for repeated moderate-or-higher findings, without mutating GitHub.
 - Producing durable report artifacts from Hoglah queue traces.
 - Detecting queue-vigilance load, long-running queue lifecycles, repeated observation clusters, runtime errors, missing evidence, unsupported outputs, and explicit Cairn observation tags.
 - Using exact git pins for fresh-machine installs while local releases/tags catch up.

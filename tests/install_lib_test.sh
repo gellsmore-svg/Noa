@@ -331,6 +331,19 @@ grep -q '"title": "Trace A"' "$index_root/index.json" \
 
 echo "live_observer index workflow: pass"
 
+"$ROOT/workflows/live_observer_issue_drafts.py" \
+  --index "$index_root/index.json" \
+  --min-count 2 \
+  --min-risk moderate >/dev/null
+test -s "$index_root/issue-drafts/human-load-queue-vigilance-load.md" \
+  || { echo "expected repeated finding issue draft" >&2; exit 1; }
+grep -q "Highest observed risk: high" "$index_root/issue-drafts/human-load-queue-vigilance-load.md" \
+  || { echo "expected highest risk in issue draft" >&2; exit 1; }
+test ! -e "$index_root/issue-drafts/system-reliability-long-queue-lifecycle.md" \
+  || { echo "single-observation finding should not get an issue draft" >&2; exit 1; }
+
+echo "live_observer issue draft workflow: pass"
+
 rm -f "$tmp/bin/cairn-galeed-observe" "$tmp/cairn.args"
 PATH="$tmp/bin:$PATH" MOCK_GALEED_ARGS="$tmp/galeed.args" MOCK_CAIRN_ARGS="$tmp/cairn.args" \
   CAIRN_GALEED_OBSERVE="$tmp/bin/missing-cairn-observe" \

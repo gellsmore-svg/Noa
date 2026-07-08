@@ -24,3 +24,7 @@ esac
 
 "$ROOT/workflows/live_observer.sh" "${args[@]}"
 "$ROOT/workflows/live_observer_index.py" --root "$base_dir"
+"$ROOT/workflows/live_observer_issue_drafts.py" \
+  --index "$base_dir/index.json" \
+  --min-count "${NOA_OBSERVER_ISSUE_MIN_COUNT:-2}" \
+  --min-risk "${NOA_OBSERVER_ISSUE_MIN_RISK:-moderate}"
