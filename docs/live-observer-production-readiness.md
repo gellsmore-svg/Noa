@@ -15,7 +15,7 @@ The reproducible fresh-machine lock is `versions.git.lock`.
 - Hoglah: `b8ff2417df1b`
 - Galeed: `b4b8961499e1`
 - Cairn: `10cc3c467492`
-- Noa workflow head: `344abb7`
+- Noa workflow: tracked in this repository on `main`
 
 ## Verified
 
@@ -25,6 +25,8 @@ The reproducible fresh-machine lock is `versions.git.lock`.
   - `bash tests/codex_review_gate_test.sh`
 - Noa CI runs the installer/workflow tests on pushes and pull requests to `main`.
 - Noa's live observer fails on an empty Galeed export by default, with `--allow-empty` reserved for deliberate baseline tests.
+- Noa's scheduled observer wrapper writes timestamped report directories.
+- On native Linux, `install/install.sh` renders and enables a systemd user timer for scheduled observer runs.
 - Noa can fall back to a local Cairn virtualenv when `cairn-galeed-observe` is not on `PATH`.
 - Cairn live-observer CLIs now return clean errors for invalid input and output-write failures.
 - Hoglah emits queue lifecycle duration metadata to Galeed.
@@ -55,6 +57,7 @@ Observed output:
 ## Production-Ready Enough For
 
 - Running an operator-triggered live observer workflow against local Galeed traces.
+- Running scheduled observer reports through a native Linux systemd user timer, or manually through `workflows/live_observer_scheduled.sh`.
 - Producing durable report artifacts from Hoglah queue traces.
 - Detecting queue-vigilance load, long-running queue lifecycles, repeated observation clusters, runtime errors, missing evidence, unsupported outputs, and explicit Cairn observation tags.
 - Using exact git pins for fresh-machine installs while local releases/tags catch up.
@@ -62,7 +65,6 @@ Observed output:
 ## Still Later, Not Blocking This Path
 
 - Release tags and changelogs across every sibling repo.
-- A scheduled Noa observer daemon or service wrapper.
 - A dashboard over repeated Cairn findings.
 - Automatic issue creation from high-confidence repeated findings.
 - Wider end-to-end UI observation with Playwright or browser-control agents.

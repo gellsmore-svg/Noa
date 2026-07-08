@@ -36,6 +36,7 @@ inject_tirzah_into_keturah "$ROOT"
 inject_milcah_into_keturah "$ROOT"
 install_cairn_app "$ROOT"
 start_hoglah_worker
+install_live_observer_timer
 inject_mahalath_into_tirzah "$ROOT"
 inject_hoglah_into_tirzah "$ROOT"
 render_tirzah_config
@@ -55,4 +56,5 @@ info "Then try:  tirzah ask --query 'what does substrate mean here?'"
 info "Debug LLM calls:  galeed trace --follow   (or 'galeed serve' + Mizpah for the browser)"
 info "Compose process views:  cairn-serve   (http://127.0.0.1:8795 — save views as templates)"
 info "Observe a live trace:  ./workflows/live_observer.sh --trace <trace_id>"
+info "Scheduled observer:  ./workflows/live_observer_scheduled.sh   (systemd timer on native Linux)"
 info "Coding-agent bridge:  keturah-mcp + galeed-codex-hook  (configured in ~/.codex/config.toml)"

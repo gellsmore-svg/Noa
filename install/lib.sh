@@ -489,6 +489,37 @@ restart_hoglah_worker() {
   start_hoglah_worker
 }
 
+# Native Linux: install a user timer that runs the Galeed -> Cairn live observer
+# into timestamped report directories. WSL/no-systemd users can call the wrapper
+# manually or from cron.
+install_live_observer_timer() {
+  local unitdir="$HOME/.config/systemd/user"
+  local service_template="$NOA_LIB_ROOT/services/noa-live-observer.service"
+  local timer_template="$NOA_LIB_ROOT/services/noa-live-observer.timer"
+  local on_calendar="${NOA_OBSERVER_ON_CALENDAR:-hourly}"
+  local randomized_delay="${NOA_OBSERVER_RANDOMIZED_DELAY_SEC:-5m}"
+
+  [ -x "$NOA_LIB_ROOT/workflows/live_observer_scheduled.sh" ] \
+    || chmod +x "$NOA_LIB_ROOT/workflows/live_observer_scheduled.sh" 2>/dev/null || true
+
+  if ! _systemd_user_available; then
+    info "systemd user timer unavailable; scheduled observer can be run with workflows/live_observer_scheduled.sh"
+    return 0
+  fi
+  [ -f "$service_template" ] && [ -f "$timer_template" ] \
+    || { warn "live observer timer templates missing — scheduled observer not installed."; return 0; }
+  mkdir -p "$unitdir"
+  sed -e "s#@ROOT@#$NOA_LIB_ROOT#g" "$service_template" \
+    > "$unitdir/noa-live-observer.service" || { warn "could not render live observer service."; return 0; }
+  sed -e "s#@ON_CALENDAR@#$on_calendar#g" \
+      -e "s#@RANDOMIZED_DELAY_SEC@#$randomized_delay#g" "$timer_template" \
+    > "$unitdir/noa-live-observer.timer" || { warn "could not render live observer timer."; return 0; }
+  systemctl --user daemon-reload \
+    && systemctl --user enable --now noa-live-observer.timer >/dev/null 2>&1 \
+    && info "scheduled live observer enabled ($on_calendar; systemctl --user list-timers noa-live-observer.timer)" \
+    || warn "could not enable scheduled live observer timer."
+}
+
 # Best-effort schema migrations on tools that expose a `migrate` command.
 run_migrations() {
   if command -v mahalath >/dev/null 2>&1 && mahalath --help 2>&1 | grep -q '\bmigrate\b'; then

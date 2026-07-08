@@ -37,6 +37,36 @@ production-readiness snapshot.
 If the Galeed export contains no events, the workflow fails by default. Use
 `--allow-empty` only for smoke tests or deliberate empty-baseline reports.
 
+## Scheduled Runs
+
+For timestamped operator reports, run:
+
+```bash
+./workflows/live_observer_scheduled.sh
+```
+
+The scheduled wrapper reads `.env` and writes to:
+
+```text
+${NOA_OBSERVER_OUT_DIR:-reports/live-observer}/scheduled/<UTC run id>/
+```
+
+Set these `.env` keys to tune it:
+
+- `NOA_OBSERVER_ON_CALENDAR` - systemd timer schedule, default `hourly`.
+- `NOA_OBSERVER_RANDOMIZED_DELAY_SEC` - timer jitter, default `5m`.
+- `NOA_OBSERVER_LIMIT` - event export limit, default `200`.
+- `NOA_OBSERVER_TRACE_ID` or `NOA_OBSERVER_SESSION_ID` - optional filter.
+- `NOA_OBSERVER_ALLOW_EMPTY` - set `true` only for deliberate empty baselines.
+
+On native Linux, `install/install.sh` renders and enables:
+
+- `~/.config/systemd/user/noa-live-observer.service`
+- `~/.config/systemd/user/noa-live-observer.timer`
+
+On WSL or other no-systemd environments, run the scheduled wrapper manually or
+from cron.
+
 This lets a running stack answer the practical questions:
 
 - where did the system wait, fail, retry, or ask the user to repair context?

@@ -1,0 +1,13 @@
+# Noa scheduled live observer — systemd USER timer template.
+# install.sh renders @ON_CALENDAR@ from NOA_OBSERVER_ON_CALENDAR.
+[Unit]
+Description=Run Noa live observer on a schedule
+
+[Timer]
+OnCalendar=@ON_CALENDAR@
+Persistent=true
+RandomizedDelaySec=@RANDOMIZED_DELAY_SEC@
+Unit=noa-live-observer.service
+
+[Install]
+WantedBy=timers.target

@@ -34,6 +34,9 @@ environment, separate from any dev checkout or virtualenv.
 - `workflows/live_observer.sh` — exports Galeed trace events and produces a
   Cairn live-observation report for human-load, agent-effectiveness, and runtime
   findings.
+- `workflows/live_observer_scheduled.sh` — runs the live observer into a
+  timestamped report folder; `install.sh` enables it as a systemd user timer on
+  native Linux.
 - `docs/` — the **[readiness & integration report](docs/STACK-READINESS-REPORT.md)**
   (the full plan), plus runtime/change-management notes.
 

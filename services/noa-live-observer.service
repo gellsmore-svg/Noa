@@ -1,0 +1,12 @@
+# Noa scheduled live observer — systemd USER service template.
+# install.sh renders this into ~/.config/systemd/user/noa-live-observer.service,
+# substituting @ROOT@ with the Noa checkout path.
+[Unit]
+Description=Noa live observer scheduled run
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+WorkingDirectory=@ROOT@
+ExecStart=@ROOT@/workflows/live_observer_scheduled.sh

@@ -274,6 +274,24 @@ test -s "$observer_out/trace-trace_demo-cairn-report.md" \
 
 echo "live_observer workflow command chain: pass"
 
+scheduled_out="$tmp/scheduled-observer"
+PATH="$tmp/bin:$PATH" MOCK_GALEED_ARGS="$tmp/galeed.args" MOCK_CAIRN_ARGS="$tmp/cairn.args" \
+  NOA_OBSERVER_RUN_ID=20260708T120000Z \
+  NOA_OBSERVER_SCHEDULED_OUT_DIR="$scheduled_out" \
+  NOA_OBSERVER_SESSION_ID=sess_demo \
+  NOA_OBSERVER_LIMIT=7 \
+  NOA_OBSERVER_TITLE="Scheduled Observer Test" \
+  "$ROOT/workflows/live_observer_scheduled.sh" >/dev/null
+
+grep -q -- "events --session sess_demo --limit 7 --json" "$tmp/galeed.args" \
+  || { echo "expected scheduled observer session export args" >&2; exit 1; }
+grep -q -- "--title Scheduled Observer Test" "$tmp/cairn.args" \
+  || { echo "expected scheduled observer title" >&2; exit 1; }
+test -s "$scheduled_out/20260708T120000Z/session-sess_demo-cairn-report.md" \
+  || { echo "expected scheduled observer timestamped report" >&2; exit 1; }
+
+echo "live_observer scheduled workflow: pass"
+
 rm -f "$tmp/bin/cairn-galeed-observe" "$tmp/cairn.args"
 PATH="$tmp/bin:$PATH" MOCK_GALEED_ARGS="$tmp/galeed.args" MOCK_CAIRN_ARGS="$tmp/cairn.args" \
   CAIRN_GALEED_OBSERVE="$tmp/bin/missing-cairn-observe" \
@@ -295,6 +313,37 @@ PATH="$tmp/bin:$PATH" MOCK_GALEED_ARGS="$tmp/galeed.args" MOCK_CAIRN_ARGS="$tmp/
   --out-dir "$observer_out/empty-allowed" >/dev/null
 
 echo "live_observer workflow empty export guard: pass"
+
+cat > "$tmp/bin/systemctl" <<'SH'
+#!/usr/bin/env bash
+echo "$@" >> "${MOCK_SYSTEMCTL_LOG:-/dev/null}"
+if [ "$1" = "--user" ] && [ "$2" = "show-environment" ]; then
+  exit 0
+fi
+if [ "$1" = "--user" ] && [ "$2" = "daemon-reload" ]; then
+  exit 0
+fi
+if [ "$1" = "--user" ] && [ "$2" = "enable" ] && [ "$3" = "--now" ] && [ "$4" = "noa-live-observer.timer" ]; then
+  exit 0
+fi
+exit 1
+SH
+chmod +x "$tmp/bin/systemctl"
+mkdir -p "$tmp/home"
+: > "$tmp/systemctl.log"
+HOME="$tmp/home" PATH="$tmp/bin:$PATH" MOCK_SYSTEMCTL_LOG="$tmp/systemctl.log" \
+  NOA_OBSERVER_ON_CALENDAR="*:0/15" NOA_OBSERVER_RANDOMIZED_DELAY_SEC=30s \
+  install_live_observer_timer >/dev/null
+
+grep -q -- "enable --now noa-live-observer.timer" "$tmp/systemctl.log" \
+  || { echo "expected live observer timer to be enabled" >&2; exit 1; }
+grep -q -- "OnCalendar=\\*:0/15" "$tmp/home/.config/systemd/user/noa-live-observer.timer" \
+  || { echo "expected rendered observer timer schedule" >&2; exit 1; }
+grep -q -- "ExecStart=$ROOT/workflows/live_observer_scheduled.sh" \
+  "$tmp/home/.config/systemd/user/noa-live-observer.service" \
+  || { echo "expected rendered observer service command" >&2; exit 1; }
+
+echo "live_observer systemd timer install: pass"
 
 cat > "$tmp/bin/curl" <<'SH'
 #!/usr/bin/env bash
