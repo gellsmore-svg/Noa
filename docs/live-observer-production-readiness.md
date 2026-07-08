@@ -1,0 +1,68 @@
+# Live Observer Production Readiness
+
+Date: 2026-07-08
+
+This is the current production-readiness snapshot for the Noa live-observer path:
+
+```text
+Galeed trace events -> Cairn observations -> Cairn live-observer report -> Noa workflow artifacts
+```
+
+## Current Pins
+
+The reproducible fresh-machine lock is `versions.git.lock`.
+
+- Hoglah: `b8ff2417df1b`
+- Galeed: `b4b8961499e1`
+- Cairn: `10cc3c467492`
+- Noa workflow head: `344abb7`
+
+## Verified
+
+- Cairn full test suite passes: `104 passed`.
+- Noa installer/workflow tests pass:
+  - `bash tests/install_lib_test.sh`
+  - `bash tests/codex_review_gate_test.sh`
+- Noa CI runs the installer/workflow tests on pushes and pull requests to `main`.
+- Noa's live observer fails on an empty Galeed export by default, with `--allow-empty` reserved for deliberate baseline tests.
+- Noa can fall back to a local Cairn virtualenv when `cairn-galeed-observe` is not on `PATH`.
+- Cairn live-observer CLIs now return clean errors for invalid input and output-write failures.
+- Hoglah emits queue lifecycle duration metadata to Galeed.
+- Galeed exposes a producer helper for Cairn-readable observations.
+
+## Local Production Smoke
+
+Command:
+
+```bash
+./workflows/live_observer.sh \
+  --session hoglah \
+  --limit 100 \
+  --title "Noa Hoglah live observer production smoke" \
+  --out-dir /tmp/noa-observer-smoke-final
+```
+
+Observed output:
+
+- Galeed export: 24 Hoglah queue events.
+- Cairn observations: 24 JSONL observations.
+- Cairn report findings:
+  - queue vigilance load,
+  - long queue lifecycle, with 9 lifecycles at or above 30000 ms,
+  - repeated observation cluster.
+- Report risk: moderate.
+
+## Production-Ready Enough For
+
+- Running an operator-triggered live observer workflow against local Galeed traces.
+- Producing durable report artifacts from Hoglah queue traces.
+- Detecting queue-vigilance load, long-running queue lifecycles, repeated observation clusters, runtime errors, missing evidence, unsupported outputs, and explicit Cairn observation tags.
+- Using exact git pins for fresh-machine installs while local releases/tags catch up.
+
+## Still Later, Not Blocking This Path
+
+- Release tags and changelogs across every sibling repo.
+- A scheduled Noa observer daemon or service wrapper.
+- A dashboard over repeated Cairn findings.
+- Automatic issue creation from high-confidence repeated findings.
+- Wider end-to-end UI observation with Playwright or browser-control agents.
