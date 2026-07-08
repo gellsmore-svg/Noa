@@ -22,4 +22,5 @@ case "${NOA_OBSERVER_ALLOW_EMPTY:-false}" in
   true|1|yes|on) args+=(--allow-empty) ;;
 esac
 
-exec "$ROOT/workflows/live_observer.sh" "${args[@]}"
+"$ROOT/workflows/live_observer.sh" "${args[@]}"
+"$ROOT/workflows/live_observer_index.py" --root "$base_dir"

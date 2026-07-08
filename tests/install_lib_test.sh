@@ -289,8 +289,47 @@ grep -q -- "--title Scheduled Observer Test" "$tmp/cairn.args" \
   || { echo "expected scheduled observer title" >&2; exit 1; }
 test -s "$scheduled_out/20260708T120000Z/session-sess_demo-cairn-report.md" \
   || { echo "expected scheduled observer timestamped report" >&2; exit 1; }
+test -s "$scheduled_out/index.md" \
+  || { echo "expected scheduled observer index" >&2; exit 1; }
 
 echo "live_observer scheduled workflow: pass"
+
+index_root="$tmp/index-root"
+mkdir -p "$index_root/run-a" "$index_root/run-b"
+cat > "$index_root/run-a/trace-a-cairn-report.md" <<'MD'
+# Trace A
+
+Events: 3
+
+## Findings
+- **human_load: queue vigilance load** - Observed waiting.
+
+## Risk
+moderate (probability: medium; impact: medium; confidence: medium)
+MD
+cat > "$index_root/run-b/trace-b-cairn-report.md" <<'MD'
+# Trace B
+
+Events: 5
+
+## Findings
+- **human_load: queue vigilance load** - Observed waiting.
+- **system_reliability: long queue lifecycle** - Observed delay.
+
+## Risk
+high (probability: high; impact: medium; confidence: medium)
+MD
+"$ROOT/workflows/live_observer_index.py" --root "$index_root" >/dev/null
+grep -q "Reports: 2" "$index_root/index.md" \
+  || { echo "expected observer index report count" >&2; exit 1; }
+grep -q "Events: 8" "$index_root/index.md" \
+  || { echo "expected observer index event total" >&2; exit 1; }
+grep -q "human_load: queue vigilance load: 2" "$index_root/index.md" \
+  || { echo "expected repeated finding count" >&2; exit 1; }
+grep -q '"title": "Trace A"' "$index_root/index.json" \
+  || { echo "expected observer index JSON" >&2; exit 1; }
+
+echo "live_observer index workflow: pass"
 
 rm -f "$tmp/bin/cairn-galeed-observe" "$tmp/cairn.args"
 PATH="$tmp/bin:$PATH" MOCK_GALEED_ARGS="$tmp/galeed.args" MOCK_CAIRN_ARGS="$tmp/cairn.args" \

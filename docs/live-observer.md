@@ -51,6 +51,11 @@ The scheduled wrapper reads `.env` and writes to:
 ${NOA_OBSERVER_OUT_DIR:-reports/live-observer}/scheduled/<UTC run id>/
 ```
 
+After each scheduled run it refreshes:
+
+- `index.md` - operator-readable rollup of reports, event totals, risk, and repeated findings.
+- `index.json` - machine-readable report summaries for future dashboards or issue creation.
+
 Set these `.env` keys to tune it:
 
 - `NOA_OBSERVER_ON_CALENDAR` - systemd timer schedule, default `hourly`.
@@ -66,6 +71,12 @@ On native Linux, `install/install.sh` renders and enables:
 
 On WSL or other no-systemd environments, run the scheduled wrapper manually or
 from cron.
+
+To rebuild the index without running a new observation:
+
+```bash
+./workflows/live_observer_index.py --root reports/live-observer/scheduled
+```
 
 This lets a running stack answer the practical questions:
 
