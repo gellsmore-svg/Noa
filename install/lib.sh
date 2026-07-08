@@ -96,7 +96,7 @@ _is_family_lib() { case " $FAMILY_LIBS " in *" $1 "*) return 0 ;; *) return 1 ;;
 # Build local wheels for unpublished family libraries. Pip can then satisfy
 # dependencies like `galeed>=0.1` or `keturah>=0.1` without consulting PyPI.
 build_family_wheelhouse() {
-  local root="$1" lock wheelhouse tool version src spec
+  local root="$1" lock wheelhouse tool version src spec family_count=0
   lock="$(versions_lock "$root")"
   wheelhouse="${NOA_WHEELHOUSE:-$HOME/.cache/noa/wheelhouse}"
   NOA_BUILT_WHEELHOUSE="$wheelhouse"
@@ -106,6 +106,7 @@ build_family_wheelhouse() {
   : > "$wheelhouse/family-constraints.txt"
   while read -r tool version src; do
     _is_family_lib "$tool" || continue
+    family_count=$((family_count + 1))
     spec="$(pip_spec "$tool" "" "$src")" \
       || { warn "$tool: source '$src' missing — tools depending on it may not resolve."; continue; }
     info "wheel $tool $version  <-  $src"
@@ -118,7 +119,7 @@ build_family_wheelhouse() {
     printf '%s==%s\n' "$tool" "$version" >> "$wheelhouse/family-constraints.txt"
   done < <(grep -vE '^\s*#|^\s*$' "$lock")
 
-  find "$wheelhouse" -maxdepth 1 -name '*.whl' -print -quit | grep -q . \
+  [ "$family_count" -eq 0 ] || find "$wheelhouse" -maxdepth 1 -name '*.whl' -print -quit | grep -q . \
     || warn "no family library wheels built — fresh installs may fail to resolve galeed/keturah/cairn."
 }
 
