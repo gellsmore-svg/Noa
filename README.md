@@ -1,5 +1,9 @@
 # Noa — the runtime that holds the family together
 
+[![CI](https://github.com/gellsmore-svg/Noa/actions/workflows/ci.yml/badge.svg)](https://github.com/gellsmore-svg/Noa/actions/workflows/ci.yml)
+[![Release](https://img.shields.io/github/v/release/gellsmore-svg/Noa)](https://github.com/gellsmore-svg/Noa/releases)
+[![License](https://img.shields.io/github/license/gellsmore-svg/Noa)](LICENSE)
+
 **Noa** is the orchestration sibling for the local AI stack: **Mahalath** (semantic
 precision), **Tirzah** (memory/retrieval), **Hoglah** (serialized LLM queue), and
 later **Milcah** (coherence engine). It does **not** replace those projects — it
@@ -21,6 +25,8 @@ environment, separate from any dev checkout or virtualenv.
   Noa's GitHub visibility.
 - `scripts/public_readiness_check.sh` — repeatable checks for public-facing
   hygiene before changing repository visibility.
+- `CONTRIBUTING.md` and `SECURITY.md` — public collaboration and vulnerability
+  reporting guidance.
 - `install/` — `install.sh` (bring the stack up), `upgrade.sh` (backup → reinstall
   pinned → migrate → health, with rollback guidance), `lib.sh` (shared helpers).
 - `services/hoglah-worker.service` — systemd **user** unit for the Hoglah worker.

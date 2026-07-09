@@ -1,5 +1,10 @@
 # Changelog
 
+## [Unreleased]
+
+- Added README badges for CI, release, and license.
+- Added public `CONTRIBUTING.md` and `SECURITY.md` guidance.
+
 ## [v0.1.0] - 2026-07-09
 
 First public baseline for Noa, the runtime scaffold for the family AI stack.
