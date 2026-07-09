@@ -31,7 +31,7 @@ small release, not a settings toggle.
 - Confirm the repository license remains aligned with the sibling repositories. Done: Apache License 2.0.
 - Confirm all sibling repos referenced by `versions.git.lock` are public or intentionally accessible to the target audience.
 - Run `bash scripts/public_readiness_check.sh` before changing visibility.
-- Run `NOA_PUBLIC_CHECK_NETWORK=1 bash scripts/public_readiness_check.sh` to verify public git refs are reachable.
+- Run `NOA_PUBLIC_CHECK_NETWORK=1 bash scripts/public_readiness_check.sh` to verify public git refs are reachable. Done in clean clone at `1efd90c0c593`.
 - Run a broader tracked-file secret scan before changing visibility.
 - Confirm no tracked file contains personal paths, credentials, private host
   names, customer data, prompts, traces, or live reports.
@@ -39,7 +39,7 @@ small release, not a settings toggle.
   outputs ignored.
 - Update docs that still say Noa is private unless they are clearly historical. Done for the fresh-install path and lockfile comments.
 - Add a short public-positioning paragraph to the README: Noa is an orchestration/runtime scaffold, not a vendor of sibling project code. Done.
-- Run install and review-gate tests from a clean checkout using `VERSIONS_LOCK=versions.git.lock`.
+- Run install and review-gate tests from a clean checkout using `VERSIONS_LOCK=versions.git.lock`. Done in clean clone at `1efd90c0c593`.
 
 ## What Should Stay Out Of The Public Repo
 
@@ -53,7 +53,7 @@ small release, not a settings toggle.
 
 ## Visibility Decision
 
-Once the checklist is complete, making Noa public is sensible. It gives the
-family stack a clear, inspectable entry point and makes the installation story
-more coherent. Until then, keep Noa private or publish a cleaned release branch
-instead of flipping the current repository in place.
+Making Noa public is now sensible once the owner is comfortable with the
+remaining broader tracked-file review. The automated hygiene checks, network
+pin checks, install workflow tests, and Codex review-gate tests have passed from
+a fresh GitHub clone.
