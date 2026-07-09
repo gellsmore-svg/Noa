@@ -96,3 +96,7 @@ A native Windows installer is under analysis and development. See the
 The goal is a selectable installer (repos other than Relational-Substrate) that
 produces a working default local configuration on Windows 10/11. The Linux
 bash path (`install/install.sh`) remains the primary reference implementation.
+
+## License
+
+[Apache License 2.0](LICENSE).

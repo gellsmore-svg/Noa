@@ -23,13 +23,12 @@ small release, not a settings toggle.
 - Some historical docs describe Noa as private or mention old machine-specific
   defaults; these should be either updated, moved to a historical note, or made
   explicit as fixed legacy findings.
-- No license file is present in Noa at the time of this note. A public repo
-  should include an explicit license, or intentionally state that it is not
-  licensed for reuse.
+- Noa uses the same license as the sibling repositories:
+  [Apache License 2.0](../LICENSE).
 
 ## Public-Ready Checklist
 
-- Decide and add the repository license.
+- Confirm the repository license remains aligned with the sibling repositories.
 - Confirm all sibling repos referenced by `versions.git.lock` are public or
   intentionally accessible to the target audience.
 - Run a tracked-file secret scan before changing visibility.
