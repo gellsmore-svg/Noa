@@ -379,6 +379,25 @@ PATH="$tmp/bin:$PATH" MOCK_GALEED_ARGS="$tmp/galeed.args" MOCK_CAIRN_ARGS="$tmp/
 
 echo "live_observer workflow invalid override: pass"
 
+cat > "$tmp/bin/cairn-galeed-observe" <<'SH'
+#!/usr/bin/env bash
+printf '%s\n' "$*" > "$MOCK_CAIRN_ARGS"
+input="$1"
+shift
+while [ "$#" -gt 0 ]; do
+  case "$1" in
+    --observations-output) observations="$2"; shift 2 ;;
+    --output) report="$2"; shift 2 ;;
+    --title) title="$2"; shift 2 ;;
+    *) shift ;;
+  esac
+done
+test -s "$input"
+printf '{"kind":"agent_output"}\n' > "$observations"
+printf '# %s\n' "$title" > "$report"
+SH
+chmod +x "$tmp/bin/cairn-galeed-observe"
+
 if PATH="$tmp/bin:$PATH" MOCK_GALEED_ARGS="$tmp/galeed.args" MOCK_CAIRN_ARGS="$tmp/cairn.args" \
   MOCK_GALEED_EMPTY=1 "$ROOT/workflows/live_observer.sh" --trace empty --out-dir "$observer_out/empty" \
   >/dev/null 2>"$tmp/empty.err"; then
