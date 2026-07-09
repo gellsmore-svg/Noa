@@ -32,9 +32,11 @@ small release, not a settings toggle.
 - Confirm all sibling repos referenced by `versions.git.lock` are public or intentionally accessible to the target audience.
 - Run `bash scripts/public_readiness_check.sh` before changing visibility.
 - Run `NOA_PUBLIC_CHECK_NETWORK=1 bash scripts/public_readiness_check.sh` to verify public git refs are reachable. Done in clean clone at `1efd90c0c593`.
-- Run a broader tracked-file secret scan before changing visibility.
+- Run a broader tracked-file secret scan before changing visibility. Done for tracked docs and scripts; only benign documentation terms and token-budget variable names were found.
 - Confirm no tracked file contains personal paths, credentials, private host
-  names, customer data, prompts, traces, or live reports.
+  names, customer data, prompts, traces, or live reports. Done by automated
+  check plus tracked documentation review; generated `reports/` content remains
+  ignored.
 - Keep `.env`, backups, live reports, local issue drafts, databases, and queue
   outputs ignored.
 - Update docs that still say Noa is private unless they are clearly historical. Done for the fresh-install path and lockfile comments.

@@ -12,18 +12,20 @@ Galeed trace events -> Cairn observations -> Cairn live-observer report -> Noa w
 
 The reproducible fresh-machine lock is `versions.git.lock`.
 
-- Hoglah: `b8ff2417df1b`
+- Hoglah: `b8ff2416885e`
 - Galeed: `b4b8961499e1`
-- Cairn: `10cc3c467492`
+- Cairn: `a516844a454b`
 - Noa workflow: tracked in this repository on `main`
 
 ## Verified
 
-- Cairn full test suite passes: `104 passed`.
+- Noa public-readiness checks pass:
+  - `bash scripts/public_readiness_check.sh`
+  - `NOA_PUBLIC_CHECK_NETWORK=1 bash scripts/public_readiness_check.sh`
 - Noa installer/workflow tests pass:
   - `bash tests/install_lib_test.sh`
   - `bash tests/codex_review_gate_test.sh`
-- Noa CI runs the installer/workflow tests on pushes and pull requests to `main`.
+- Noa CI runs the public-readiness, installer/workflow, and Codex review-gate tests on pushes and pull requests to `main`.
 - Noa's live observer fails on an empty Galeed export by default, with `--allow-empty` reserved for deliberate baseline tests.
 - Noa's scheduled observer wrapper writes timestamped report directories.
 - Noa's scheduled observer refreshes Markdown and JSON indexes over repeated findings.
