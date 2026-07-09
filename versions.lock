@@ -1,7 +1,7 @@
 # The pin contract: the runtime-consumable version of each sibling.
 # install.sh / upgrade.sh install exactly these. Bump a pin → run upgrade.sh.
-# Source today is the local repos under ~/domains; switch the install source to
-# git tags or PyPI once releases are published (see install.sh).
+# Source today is the local dev repos under ~/domains. Public or fresh-machine
+# installs should use versions.git.lock instead.
 #
 # tool      version   repo
 mahalath    1.1.0     ~/domains/Mahalath

@@ -5,7 +5,8 @@ changing GitHub repository visibility.
 
 ## Recommendation
 
-Do not make Noa public until the checklist below is complete.
+Noa is close to public-ready. Complete the remaining checklist items before
+changing GitHub repository visibility.
 
 Noa is valuable as a public orchestration layer, but it is also the repo that
 describes how the family tools are installed, configured, observed, and run
@@ -20,27 +21,25 @@ small release, not a settings toggle.
 - `reports/` is ignored and should remain untracked. Live observer outputs can
   include prompts, traces, token counts, findings, and issue drafts.
 - `versions.git.lock` points at public git refs for the sibling projects.
-- Some historical docs describe Noa as private or mention old machine-specific
-  defaults; these should be either updated, moved to a historical note, or made
-  explicit as fixed legacy findings.
+- Historical docs may mention old machine-specific defaults; keep those generic
+  and explicit as historical findings rather than live configuration advice.
 - Noa uses the same license as the sibling repositories:
   [Apache License 2.0](../LICENSE).
 
 ## Public-Ready Checklist
 
-- Confirm the repository license remains aligned with the sibling repositories.
-- Confirm all sibling repos referenced by `versions.git.lock` are public or
-  intentionally accessible to the target audience.
-- Run a tracked-file secret scan before changing visibility.
+- Confirm the repository license remains aligned with the sibling repositories. Done: Apache License 2.0.
+- Confirm all sibling repos referenced by `versions.git.lock` are public or intentionally accessible to the target audience.
+- Run `bash scripts/public_readiness_check.sh` before changing visibility.
+- Run `NOA_PUBLIC_CHECK_NETWORK=1 bash scripts/public_readiness_check.sh` to verify public git refs are reachable.
+- Run a broader tracked-file secret scan before changing visibility.
 - Confirm no tracked file contains personal paths, credentials, private host
   names, customer data, prompts, traces, or live reports.
 - Keep `.env`, backups, live reports, local issue drafts, databases, and queue
   outputs ignored.
-- Update docs that still say Noa is private unless they are clearly historical.
-- Add a short public-positioning paragraph to the README: Noa is an
-  orchestration/runtime scaffold, not a vendor of sibling project code.
-- Run install and review-gate tests from a clean checkout using
-  `VERSIONS_LOCK=versions.git.lock`.
+- Update docs that still say Noa is private unless they are clearly historical. Done for the fresh-install path and lockfile comments.
+- Add a short public-positioning paragraph to the README: Noa is an orchestration/runtime scaffold, not a vendor of sibling project code. Done.
+- Run install and review-gate tests from a clean checkout using `VERSIONS_LOCK=versions.git.lock`.
 
 ## What Should Stay Out Of The Public Repo
 

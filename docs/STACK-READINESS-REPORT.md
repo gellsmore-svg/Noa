@@ -32,20 +32,20 @@ Date: 2026-06-22 · Method: code inspection at each repo's `main` HEAD (pyprojec
 ### Tirzah — Mostly ready
 - v1.2.0 (classifier still "Pre-Alpha"); largest codebase (115 py / 33 test files). **Only repo with Docker** (`Dockerfile` + `docker-compose.yml`).
 - Needs MongoDB (`mnemosyne_dev`) + Ollama. Config is `config.yaml` with a **cwd-relative default** (`load_config(path="config.yaml")`).
-- **Verified blocker:** `config.py:48` hardcodes `ollama_executable = /mnt/c/Users/cello/AppData/Local/Programs/Ollama/ollama.exe` (a pydantic default → overridable; primary `ollama_base_url` is portable `http://localhost:11434`).
+- **Historical verified blocker:** `config.py:48` used a machine-specific `ollama_executable` default such as `/mnt/c/Users/<user>/AppData/Local/Programs/Ollama/ollama.exe` (a pydantic default → overridable; primary `ollama_base_url` is portable `http://localhost:11434`).
 - **Tests:** mostly hermetic (22/33 use fakes/fixtures, 3 touch live services).
 
 ### Mahalath — Mostly ready (two portability hazards)
 - **Version mismatch:** `pyproject` = `1.1.0`, `__init__.__version__` = `0.0.1`. 73 py / 33 test files.
 - Needs MongoDB (`mahalath_dev`) + Ollama. Exposes a Python package, `mahalath` CLI, and an optional FastAPI service (`[web]` extra).
-- **Verified hazards:** `config.py:88` hardcodes the same WSL `ollama.exe`; `adapters/factory.py:33` reads `/etc/resolv.conf` (WSL→Windows-host networking hack). Both assume your specific WSL setup.
+- **Historical verified hazards:** `config.py:88` used the same WSL `ollama.exe` style default; `adapters/factory.py:33` reads `/etc/resolv.conf` (WSL→Windows-host networking hack). Both assume a specific WSL setup unless overridden or fixed.
 - **Tests:** strongly hermetic (12 fixtures, 1 live signal across 33 files).
 
 ### Milcah — Not ready (intended)
 - v0.2.0; functionally rich after recent work (FR1–FR7, FR9, FR11), but pre-production. **Cleanest code hygiene** (zero hardcoded paths, zero env coupling, fully hermetic tests — 12 files, all LLM seams injected).
 - Every real analysis needs a live Hoglah daemon + Ollama; **FR10 persistence unbuilt**, so nothing is durable. Borrows Hoglah's config; can't stand alone.
 
-**Cross-cutting fresh-laptop blocker:** the shared `/mnt/c/Users/cello/.../ollama.exe` default in Tirzah + Mahalath, plus Mahalath's `/etc/resolv.conf` read, encode your current WSL machine. Not structural — config defaults — but the first things to break on a clean install.
+**Cross-cutting fresh-laptop blocker:** the shared `/mnt/c/Users/<user>/.../ollama.exe` default pattern in Tirzah + Mahalath, plus Mahalath's `/etc/resolv.conf` read, encoded a specific WSL machine. Not structural — config defaults — but the first things to break on a clean install.
 
 ---
 

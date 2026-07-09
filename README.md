@@ -19,6 +19,8 @@ environment, separate from any dev checkout or virtualenv.
   machine that can't see the local repos: `VERSIONS_LOCK=versions.git.lock ./install/install.sh`.
 - `docs/publication-readiness.md` — checklist and recommendation before changing
   Noa's GitHub visibility.
+- `scripts/public_readiness_check.sh` — repeatable checks for public-facing
+  hygiene before changing repository visibility.
 - `install/` — `install.sh` (bring the stack up), `upgrade.sh` (backup → reinstall
   pinned → migrate → health, with rollback guidance), `lib.sh` (shared helpers).
 - `services/hoglah-worker.service` — systemd **user** unit for the Hoglah worker.

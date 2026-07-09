@@ -14,6 +14,8 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
+      - name: Run public readiness checks
+        run: bash scripts/public_readiness_check.sh
       - name: Run installer/workflow tests
         run: bash tests/install_lib_test.sh
       - name: Run Codex review gate tests
