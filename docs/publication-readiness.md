@@ -1,18 +1,17 @@
 # Noa Publication Readiness
 
-This note records whether Noa should be made public and what must be true before
-changing GitHub repository visibility.
+This note records the publication-readiness review that was completed before
+Noa was made public.
 
-## Recommendation
+## Result
 
-Noa is close to public-ready. Complete the remaining checklist items before
-changing GitHub repository visibility.
+Noa is public as of `v0.1.0` on 2026-07-09.
 
 Noa is valuable as a public orchestration layer, but it is also the repo that
 describes how the family tools are installed, configured, observed, and run
 together. That makes it the place where local-machine assumptions, operational
-notes, and accidental secrets are most likely to leak. Treat publication as a
-small release, not a settings toggle.
+notes, and accidental secrets are most likely to leak. Publication was treated
+as a small release, not a settings toggle.
 
 ## Current Audit Notes
 
@@ -55,7 +54,7 @@ small release, not a settings toggle.
 
 ## Visibility Decision
 
-Making Noa public is now sensible once the owner is comfortable with the
-remaining broader tracked-file review. The automated hygiene checks, network
-pin checks, install workflow tests, and Codex review-gate tests have passed from
-a fresh GitHub clone.
+Noa is public at [github.com/gellsmore-svg/Noa](https://github.com/gellsmore-svg/Noa).
+The `v0.1.0` release records the first public baseline. Automated hygiene
+checks, network pin checks, install workflow tests, and Codex review-gate tests
+passed from a fresh GitHub clone before publication, and public CI is green.

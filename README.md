@@ -49,6 +49,7 @@ environment, separate from any dev checkout or virtualenv.
   those drafts through the GitHub CLI.
 - `docs/` — the **[readiness & integration report](docs/STACK-READINESS-REPORT.md)**
   (the full plan), plus runtime/change-management notes.
+- `CHANGELOG.md` — public release history.
 
 ## Quick start (target state)
 ```bash
@@ -62,13 +63,15 @@ Upgrades (after bumping `versions.lock`):
 ```
 
 ## Status
-**2026-06-22.** Stage 2 (stabilise) and Stage 4 (the Tirzah→Mahalath semantic seam)
-are **done**: Mahalath/Tirzah have portable Ollama config + env overrides, and
-retrieval resolves key terms to live MPL labels/senses that condition *and* annotate
-the answer (`workflows/semantic_smoke.py` passes on live labels; see
-[integration.md](docs/integration.md)). The stack is Mahalath + Tirzah +
-Hoglah + Milcah (coherence engine, snapshot viewer, specialist seam). Remaining: package/orchestration polish
-(install.sh, upgrade/backup), then change-control (report §5, §7 stages 3/5/6).
+**Public baseline:** `v0.1.0` is live at
+[github.com/gellsmore-svg/Noa](https://github.com/gellsmore-svg/Noa). Public
+CI passes for readiness checks, installer/workflow tests, and the Codex
+review-gate workflow.
+
+The stack is Mahalath + Tirzah + Hoglah + Galeed + Keturah + Cairn + Milcah,
+with Noa providing installation, configuration, health checks, and observer
+workflows. The current reproducible fresh-machine lock is
+[`versions.git.lock`](versions.git.lock).
 
 ## Hard rule
 Noa **orchestrates, it does not vendor.** It pins *released* versions of the siblings
