@@ -45,6 +45,8 @@ trap 'rm -f "$personal_marker_file" "$private_marker_file"' EXIT
   printf 'priv%s repository\n' "ate"
 } > "$private_marker_file"
 private_markers="$(git grep -n -F -f "$private_marker_file" -- . || true)"
+allowed_contributing_reports="priv""ate reports"
+private_markers="$(printf '%s\n' "$private_markers" | grep -v "^CONTRIBUTING.md:.*$allowed_contributing_reports" || true)"
 if [ -n "$private_markers" ]; then
   printf '%s\n' "$private_markers" >&2
   fail "stale private-repo wording remains in tracked files"
