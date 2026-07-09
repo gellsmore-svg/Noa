@@ -21,14 +21,30 @@ if [ -n "$tracked_bad" ]; then
 fi
 
 echo "public_readiness_check: checking personal path markers"
-personal_markers="$(git grep -n -E '/home/cello|/mnt/c/Users/cello|C:\\Users\\cello' -- . || true)"
+personal_marker_file="$(mktemp)"
+trap 'rm -f "$personal_marker_file"' EXIT
+local_user_marker="cel""lo"
+{
+  printf '/home/%s\n' "$local_user_marker"
+  printf '/mnt/c/Users/%s\n' "$local_user_marker"
+  printf 'C:\\Users\\%s\n' "$local_user_marker"
+} > "$personal_marker_file"
+personal_markers="$(git grep -n -F -f "$personal_marker_file" -- . || true)"
 if [ -n "$personal_markers" ]; then
   printf '%s\n' "$personal_markers" >&2
   fail "personal machine paths remain in tracked files"
 fi
 
 echo "public_readiness_check: checking stale private wording"
-private_markers="$(git grep -n -E 'Noa itself is private|it is private|private repo|private repository' -- . || true)"
+private_marker_file="$(mktemp)"
+trap 'rm -f "$personal_marker_file" "$private_marker_file"' EXIT
+{
+  printf 'Noa itself is priv%s\n' "ate"
+  printf 'it is priv%s\n' "ate"
+  printf 'priv%s repo\n' "ate"
+  printf 'priv%s repository\n' "ate"
+} > "$private_marker_file"
+private_markers="$(git grep -n -F -f "$private_marker_file" -- . || true)"
 if [ -n "$private_markers" ]; then
   printf '%s\n' "$private_markers" >&2
   fail "stale private-repo wording remains in tracked files"
