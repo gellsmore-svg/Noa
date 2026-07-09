@@ -17,6 +17,8 @@ environment, separate from any dev checkout or virtualenv.
 - `versions.lock` — the pinned versions of each sibling (local source paths).
   `versions.git.lock` pins the same versions to **public git refs** for a fresh
   machine that can't see the local repos: `VERSIONS_LOCK=versions.git.lock ./install/install.sh`.
+- `docs/publication-readiness.md` — checklist and recommendation before changing
+  Noa's GitHub visibility.
 - `install/` — `install.sh` (bring the stack up), `upgrade.sh` (backup → reinstall
   pinned → migrate → health, with rollback guidance), `lib.sh` (shared helpers).
 - `services/hoglah-worker.service` — systemd **user** unit for the Hoglah worker.
@@ -70,6 +72,11 @@ Hoglah + Milcah (coherence engine, snapshot viewer, specialist seam). Remaining:
 Noa **orchestrates, it does not vendor.** It pins *released* versions of the siblings
 and installs them; it never copies their code. Contents stay limited to compose +
 config templates + scripts + docs.
+
+For public use, think of Noa as the runtime scaffold for the family stack: it
+documents and automates how the sibling tools are installed, configured,
+observed, and health-checked together. Product logic and library code remain in
+the sibling repositories.
 
 ## LLM access
 Products submit LLM inference **through Hoglah**; direct Ollama adapters are

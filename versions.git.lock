@@ -1,6 +1,5 @@
-# Public git-ref pins — for a FRESH machine that can't see the local repos.
+# Public git-ref pins — for a fresh machine that can't see local dev repos.
 # Use with:  VERSIONS_LOCK=versions.git.lock ./install/install.sh
-# (Noa itself is private; only its scripts are needed locally.)
 #
 # tool      version   source
 mahalath    1.1.0     git+https://github.com/gellsmore-svg/mahalath@v1.1.0

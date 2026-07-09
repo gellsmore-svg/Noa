@@ -1,7 +1,7 @@
 # Fresh install — a new machine or a new user
 
-Stand the stack up from scratch, with no access to the developer's local repos
-(the tools install from their **public git refs**). ~20 lines of commands.
+Stand the stack up from scratch, without access to the developer's local repos.
+The tools install from their pinned git refs. ~20 lines of commands.
 
 ## Host prerequisites (already present, shared)
 - **Docker** (with the compose plugin) and permission to use it (the `docker` group).
@@ -13,7 +13,7 @@ Stand the stack up from scratch, with no access to the developer's local repos
   login is needed for new `docker` group membership to take effect.
 
 ## Steps
-1. **Get Noa** (it is private — only its scripts are needed):
+1. **Get Noa**:
    ```bash
    gh repo clone gellsmore-svg/Noa noa && cd noa
    ```
@@ -31,7 +31,7 @@ Stand the stack up from scratch, with no access to the developer's local repos
      MAHALATH_MONGO_URI=mongodb://localhost:27018
      TIRZAH_MONGO_URI=mongodb://localhost:27018
      ```
-3. **Install** from the public git refs (no dev-repo access needed):
+3. **Install** from the public git refs or release pins (no dev-repo access needed):
    ```bash
    VERSIONS_LOCK=versions.git.lock ./install/install.sh
    ```
