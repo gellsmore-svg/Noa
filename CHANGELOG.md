@@ -7,7 +7,11 @@
 - Added GitHub issue templates for bug reports and feature requests, with
   privacy reminders for traces, prompts, generated reports, and `.env` values.
 - Added a pull request template with boundary, privacy, and validation checks.
-- Updated the public Cairn pin to the current advertised `main` commit.
+- Enabled GitHub Discussions for public design/process conversations.
+- Replaced public commit pins with release tags across the sibling lockfile.
+- Updated the public Cairn pin to `cairn-lang@v0.8.1`.
+- Promoted the Cairn -> Deborah/Huldah split note to an approved pre-execution
+  roadmap.
 
 ## [v0.1.0] - 2026-07-09
 

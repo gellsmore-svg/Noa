@@ -1,7 +1,8 @@
 # Design: split Cairn, and rename to Deborah (core) + Huldah (analysis)
 
-**Date:** 2026-07-09 · **Status:** proposed, pre-execution · **Owner input needed:**
-final name→product mapping; timing (grok/codex are actively developing Cairn).
+**Date:** 2026-07-09 · **Status:** approved roadmap, pre-execution · **Current
+decision:** Deborah=core process language, Huldah=human-systems analysis. Execute
+only after active Cairn work reaches a lull or behind a compatibility shim.
 
 ## Summary
 
@@ -15,7 +16,8 @@ rename off the crowded `cairn` namespace into the family's biblical convention:
   LLM provider wrappers). *Huldah was a prophetess who interpreted and
   authenticated a text:* interpretation of signals/evidence.
 
-The mapping is swappable but reads naturally as above.
+The working decision is to keep the mapping above unless a later naming review
+finds a concrete conflict.
 
 ## Why now
 
@@ -104,7 +106,26 @@ family repos migrate imports over 1–2 cycles; drop the shim next minor.
   stated identity, minus the crowded name); `huldah` gets room to grow its
   LLM/UX/observation surface without bloating the language contract.
 
-## Open decisions
-1. Confirm name→product mapping (Deborah=core, Huldah=analysis) — swappable.
-2. `web.py` split (composer→Deborah vs analysis UI→Huldah).
-3. Timing / who executes, given active concurrent work on Cairn.
+## Execution Checklist
+
+Before any module move:
+
+- Tag the current integrated Cairn state. Done: `v0.8.1`.
+- Keep Noa pinned to the tagged integrated state until Deborah/Huldah have their
+  own public tags. Done: `versions.git.lock` uses `cairn-lang@v0.8.1`.
+- Create the Huldah repository/package scaffold with Apache License 2.0,
+  `pyproject.toml`, CI, README, and compatibility notes.
+- Create the Deborah repository/package scaffold or rename Cairn only after the
+  analysis extraction is green.
+- Add a `cairn` compatibility package for one deprecation cycle.
+- Open tracking issues in Cairn/Deborah/Huldah for each migration phase.
+- Update Noa only after both new packages have public tags and green CI.
+
+## Open Decisions
+
+1. `web.py` split: composer stays in Deborah; any analysis dashboard goes to
+   Huldah.
+2. Compatibility duration: default one minor cycle after all family consumers
+   migrate.
+3. Timing / executor: choose a low-conflict window because Cairn has active
+   concurrent work.
