@@ -2,6 +2,12 @@
 
 ## [Unreleased]
 
+## [v0.1.13] - 2026-07-10
+
+- Added CI coverage that installs the entire `versions.git.lock` into a clean
+  virtual environment and verifies family imports plus all public CLI entry
+  points.
+
 ## [v0.1.12] - 2026-07-10
 
 - Normalised public Git lock URLs to canonical `.git` references so pip resolves

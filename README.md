@@ -71,7 +71,7 @@ Upgrades (after bumping `versions.lock`):
 ```
 
 ## Status
-**Public baseline:** `v0.1.12` is live at
+**Public baseline:** `v0.1.13` is live at
 [github.com/gellsmore-svg/Noa](https://github.com/gellsmore-svg/Noa). Public
 CI passes for readiness checks, installer/workflow tests, and the Codex
 review-gate workflow. GitHub Discussions are enabled for design/process
