@@ -2,6 +2,12 @@
 
 ## [Unreleased]
 
+## [v0.1.17] - 2026-07-11
+
+- Promoted the public Hanani lock to `0.8.0`, including Fable's
+  `FR-ANALYSIS-01` semantic atom-relation mapping and its federated Keturah
+  MCP tool.
+
 ## [v0.1.16] - 2026-07-11
 
 - Extended the public `pipx` installer smoke test to verify Keturah's

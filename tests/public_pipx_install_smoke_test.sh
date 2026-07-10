@@ -37,7 +37,7 @@ mcp_tools="$(printf '%s\n' \
   '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{}}' \
   '{"jsonrpc":"2.0","id":2,"method":"tools/list","params":{}}' \
   | "$PIPX_BIN_DIR/keturah-mcp")"
-for tool in tirzah.search_memory tirzah.coherence_check hanani.ingest_and_assess hanani.analyze_gaps; do
+for tool in tirzah.search_memory tirzah.coherence_check hanani.ingest_and_assess hanani.analyze_gaps hanani.map_relations; do
   grep -Fq "\"name\": \"$tool\"" <<< "$mcp_tools"
 done
 
