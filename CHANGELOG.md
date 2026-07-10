@@ -2,6 +2,11 @@
 
 ## [Unreleased]
 
+## [v0.1.7] - 2026-07-10
+
+- Added `cairn-agent-harness-plan` to the Noa health check so missing harness
+  guidance support is visible before live-observer runs.
+
 ## [v0.1.6] - 2026-07-10
 
 - Added a companion Cairn agent-harness plan to live-observer runs so each

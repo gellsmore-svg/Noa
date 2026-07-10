@@ -36,6 +36,9 @@ The reproducible fresh-machine lock is `versions.git.lock`.
 - Noa can dry-run or explicitly publish those drafts through the GitHub CLI.
 - On native Linux, `install/install.sh` renders and enables a systemd user timer for scheduled observer runs.
 - Noa can fall back to a local Cairn virtualenv when `cairn-galeed-observe` is not on `PATH`.
+- Noa health checks verify both `cairn-galeed-observe` and
+  `cairn-agent-harness-plan`, because both are needed for the full live-observer
+  artifact set.
 - Cairn live-observer CLIs now return clean errors for invalid input and output-write failures.
 - Hoglah emits queue lifecycle duration metadata to Galeed.
 - Galeed exposes a producer helper for Cairn-readable observations.

@@ -493,13 +493,23 @@ if [ "${1:-}" = "--help" ]; then
 fi
 exit 2
 SH
+cat > "$tmp/bin/cairn-agent-harness-plan" <<'SH'
+#!/usr/bin/env bash
+if [ "${1:-}" = "--help" ]; then
+  echo "usage: cairn-agent-harness-plan"
+  exit 0
+fi
+exit 2
+SH
 chmod +x "$tmp/bin"/curl "$tmp/bin"/mongosh "$tmp/bin"/systemctl \
   "$tmp/bin"/mahalath "$tmp/bin"/tirzah "$tmp/bin"/hoglah "$tmp/bin"/milcah \
-  "$tmp/bin"/galeed "$tmp/bin"/cairn-galeed-observe
+  "$tmp/bin"/galeed "$tmp/bin"/cairn-galeed-observe "$tmp/bin"/cairn-agent-harness-plan
 
 health_out="$(PATH="$tmp/bin:$PATH" "$ROOT/health/healthcheck.sh")"
 printf '%s' "$health_out" | grep -q 'cairn-galeed-observe: usage: cairn-galeed-observe' \
   || { echo "expected healthcheck to fall back to --help for cairn-galeed-observe" >&2; exit 1; }
+printf '%s' "$health_out" | grep -q 'cairn-agent-harness-plan: usage: cairn-agent-harness-plan' \
+  || { echo "expected healthcheck to fall back to --help for cairn-agent-harness-plan" >&2; exit 1; }
 
 echo "healthcheck CLI label fallback: pass"
 
