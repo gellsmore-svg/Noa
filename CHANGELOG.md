@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## [v0.1.3] - 2026-07-10
+
 - Added Dependabot checks for GitHub Actions workflow updates.
 
 ## [v0.1.2] - 2026-07-10
