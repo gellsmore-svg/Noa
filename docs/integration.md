@@ -35,7 +35,7 @@ Give the payload its own `contract_version`, independent of either tool's intern
 `schema_version`, plus a startup compatibility check ("Tirzah expects contract ≥ N,
 Mahalath speaks N ✓"), so the two evolve on separate release cadences.
 
-## TODO
+## Completed implementation
 - [x] Resolver contract chosen: package-level `mahalath.retrieval.search_terms`
       (returns MPL label + senses/frames + match_kind + is_stale; respects staleness,
       so as safe as HTTP and needs no running web service).

@@ -18,7 +18,9 @@ rewriting their historical record.
 - Galeed needs explicit event schema compatibility fixtures before all siblings emit directly.
 - Mizpah and Mahlah consume Tirzah trace APIs today; a future Galeed collector/API is still an open design decision.
 - Tirzah→Milcah specialist invocation is available through the current MCP/coherence-check seam, with deeper runtime persistence still later work.
-- Tirzah→Mahalath semantic integration should be documented as a current public contract rather than historical TODOs.
+- Tirzah→Mahalath semantic integration is documented as the current public
+  contract in [integration.md](integration.md), while richer extraction and an
+  HTTP resolver remain optional future work.
 
 ## Runtime implication
 
