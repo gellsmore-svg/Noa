@@ -7,7 +7,7 @@
 mahalath    1.1.0     ~/domains/Mahalath
 tirzah      1.12.0     ~/domains/Tirzah
 hoglah      0.8.0     ~/domains/Hoglah
-hanani      0.7.0     ~/domains/Hanani
+hanani      0.8.0     ~/domains/Hanani
 # Family libraries: dependencies of the tools, no console apps, and not on
 # PyPI — preinstalled into each tool's venv (never pipx-installed as apps).
 # NB the PyPI 'cairn' is an UNRELATED project — ours ships as cairn-lang (import: cairn).
