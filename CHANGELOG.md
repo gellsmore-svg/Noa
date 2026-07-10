@@ -2,6 +2,11 @@
 
 ## [Unreleased]
 
+## [v0.1.12] - 2026-07-10
+
+- Normalised public Git lock URLs to canonical `.git` references so pip resolves
+  them as the same direct requirements declared by sibling packages.
+
 ## [v0.1.11] - 2026-07-10
 
 - Promoted the fresh-machine lock to the independently verified public family
