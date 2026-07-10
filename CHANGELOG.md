@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## [v0.1.1] - 2026-07-10
+
 - Added README badges for CI, release, and license.
 - Added public `CONTRIBUTING.md` and `SECURITY.md` guidance.
 - Added GitHub issue templates for bug reports and feature requests, with
