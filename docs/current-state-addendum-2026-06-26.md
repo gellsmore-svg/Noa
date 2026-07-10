@@ -5,8 +5,8 @@ rewriting their historical record.
 
 ## Current verified changes since the earlier readiness report
 
-- Hoglah is pinned at `0.8.0` in Noa and provides the current queue/runtime baseline.
-- Tirzah is pinned at `1.11.0` in Noa and includes recursive Cairn-style request planning plus MCP-facing memory/coherence surfaces.
+- Hoglah is pinned at `0.9.0` in Noa and provides the current queue/runtime baseline.
+- Tirzah is pinned at `1.12.0` in Noa and includes recursive Cairn-style request planning plus MCP-facing memory/coherence surfaces.
 - Galeed exists as the extracted cross-project trace/log spine. Tirzah currently serves the trace HTTP/SSE API consumed by Mahlah and Mizpah.
 - Milcah is pinned in Noa for the coherence/review seam, while its deeper persistence/runtime contract remains an area for later hardening.
 - Tirzah and Mahalath now default `ollama_executable` to `Path("ollama")` with HTTP `OLLAMA_BASE_URL` support, rather than hardcoding a WSL-specific `ollama.exe`.
@@ -24,4 +24,4 @@ rewriting their historical record.
 
 ## Runtime implication
 
-For the current Noa lock set, treat `hoglah>=0.8.0` as the family minimum for optional Hoglah integrations. Package metadata in Tirzah and Mahalath should match that operational constraint.
+For the current Noa lock set, treat `hoglah>=0.9.0` as the family minimum for optional Hoglah integrations. Package metadata in Tirzah and Mahalath should match that operational constraint.

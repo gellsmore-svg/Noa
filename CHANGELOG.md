@@ -2,6 +2,14 @@
 
 ## [Unreleased]
 
+## [v0.1.11] - 2026-07-10
+
+- Promoted the fresh-machine lock to the independently verified public family
+  releases: Tirzah `1.12.0`, Hoglah `0.9.0`, Hanani `0.7.0`, and Keturah
+  `0.3.0`.
+- The public runtime graph now uses explicit Git release dependencies rather
+  than attempting to resolve internal family packages from PyPI.
+
 ## [v0.1.10] - 2026-07-10
 
 - Added Hanani install health coverage and Keturah MCP injection for local

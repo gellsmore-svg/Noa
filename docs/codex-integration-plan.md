@@ -11,17 +11,17 @@ the family supply process, review, trace, and memory).
 
 - **Keturah stdio MCP server** — `keturah/mcp.py` `run_stdio_server` + `keturah-mcp`
   console script (JSON-RPC `initialize` / `tools/list` via
-  `registry.to_mcp(namespaced=True)` / `tools/call` dispatch). Keturah 0.2.0.
+  `registry.to_mcp(namespaced=True)` / `tools/call` dispatch). Keturah 0.3.0.
 - **Family-tool handlers wired** — `keturah.mcp` `main()` registers Tirzah's
   handlers (`tirzah.mcp_handlers.build_handlers`) alongside grok's semantic one.
-  Tirzah 1.11.0 exposes **`tirzah.search_memory`** (graph-memory search) and
+  Tirzah 1.12.0 exposes **`tirzah.search_memory`** (graph-memory search) and
   **`tirzah.coherence_check`** (Milcah pressure-test), both declared in
   `tirzah.manifest` so they appear in `tools/list` *and* dispatch on `tools/call`.
   Confirmed end-to-end over stdio on the dev box.
 - **Noa install scaffolding** — `render_mcp_server_config` writes
   `~/.codex/keturah-mcp.toml.example` (grok `ac0de89`).
 
-Pins: tirzah 1.11.0, keturah 0.2.0 (Noa `versions.lock`).
+Pins: tirzah 1.12.0, keturah 0.3.0 (Noa `versions.lock`).
 
 ## Next tasks — ready for pickup (codex)
 
