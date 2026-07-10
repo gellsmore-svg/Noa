@@ -370,6 +370,8 @@ test -s "$index_root/issue-drafts/human-load-queue-vigilance-load.md" \
   || { echo "expected repeated finding issue draft" >&2; exit 1; }
 grep -q "Highest observed risk: high" "$index_root/issue-drafts/human-load-queue-vigilance-load.md" \
   || { echo "expected highest risk in issue draft" >&2; exit 1; }
+grep -q 'Agent harness: `run-a/trace-a-cairn-agent-harness.md`' "$index_root/issue-drafts/human-load-queue-vigilance-load.md" \
+  || { echo "expected harness guidance link in issue draft" >&2; exit 1; }
 test ! -e "$index_root/issue-drafts/system-reliability-long-queue-lifecycle.md" \
   || { echo "single-observation finding should not get an issue draft" >&2; exit 1; }
 

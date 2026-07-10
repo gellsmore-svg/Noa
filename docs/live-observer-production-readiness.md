@@ -35,6 +35,8 @@ The reproducible fresh-machine lock is `versions.git.lock`.
 - Noa's scheduled observer index links matching agent-harness plans when those
   artifacts are present beside live-observer reports.
 - Noa drafts local GitHub-ready issue Markdown when findings cross repeat/risk thresholds.
+- Noa issue drafts include matching agent-harness links when the scheduled
+  index recorded them.
 - Noa can dry-run or explicitly publish those drafts through the GitHub CLI.
 - On native Linux, `install/install.sh` renders and enables a systemd user timer for scheduled observer runs.
 - Noa can fall back to a local Cairn virtualenv when `cairn-galeed-observe` is not on `PATH`.

@@ -2,6 +2,12 @@
 
 ## [Unreleased]
 
+## [v0.1.9] - 2026-07-10
+
+- Added matching Cairn agent-harness links to live-observer issue drafts.
+- Included the current local family lock update for Tirzah `1.12.0`, Keturah
+  `0.3.0`, and Hanani `0.4.0`.
+
 ## [v0.1.8] - 2026-07-10
 
 - Added matching Cairn agent-harness paths to the scheduled live-observer

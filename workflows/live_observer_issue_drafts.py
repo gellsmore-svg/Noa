@@ -18,6 +18,7 @@ RISK_ORDER = {"not observed": 0, "low": 1, "moderate": 2, "high": 3, "critical":
 @dataclass(frozen=True)
 class FindingEvidence:
     report_path: str
+    harness_path: str | None
     title: str
     events: int
     risk: str
@@ -52,6 +53,7 @@ def group_findings(reports: list[dict]) -> dict[str, list[FindingEvidence]]:
             grouped[str(finding)].append(
                 FindingEvidence(
                     report_path=str(report.get("path", "")),
+                    harness_path=str(report.get("harness_path")) if report.get("harness_path") else None,
                     title=str(report.get("title", "")),
                     events=int(report.get("events", 0) or 0),
                     risk=str(report.get("risk", "not observed")),
@@ -78,6 +80,8 @@ def render_issue(finding: str, evidence: list[FindingEvidence]) -> str:
     ]
     for item in evidence:
         lines.append(f"- `{item.report_path}` - {item.events} event(s), risk {item.risk}")
+        if item.harness_path:
+            lines.append(f"  Agent harness: `{item.harness_path}`")
         if item.title:
             lines.append(f"  Title: {item.title}")
 

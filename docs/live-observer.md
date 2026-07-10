@@ -61,7 +61,8 @@ After each scheduled run it refreshes:
   plans, event totals, risk, and repeated findings.
 - `index.json` - machine-readable report summaries, including matching harness
   paths when present, for future dashboards or issue creation.
-- `issue-drafts/*.md` - local GitHub-ready drafts for findings that cross the configured thresholds.
+- `issue-drafts/*.md` - local GitHub-ready drafts for findings that cross the
+  configured thresholds, including report and agent-harness links when present.
 
 Set these `.env` keys to tune it:
 
