@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+- Added Dependabot checks for GitHub Actions workflow updates.
+
 ## [v0.1.2] - 2026-07-10
 
 - Seeded the first public Discussions announcement for the `v0.1.1` baseline.
