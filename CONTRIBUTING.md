@@ -36,3 +36,9 @@ Use the GitHub issue templates for bugs and feature requests. Do not open public
 issues containing secrets, `.env` values, raw traces, generated observer
 reports, customer data, or private prompts. Use the security process for
 vulnerabilities.
+
+## Pull Requests
+
+Use the pull request template and complete the validation checklist. If a change
+touches sibling versions, explain why the pin moved and whether the target ref
+is public and reachable.
