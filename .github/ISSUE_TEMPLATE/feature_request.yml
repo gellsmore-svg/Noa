@@ -1,0 +1,52 @@
+name: Feature request
+description: Suggest an improvement to Noa's orchestration, install, observer, or health-check surface.
+title: "Feature: "
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Noa should remain the runtime scaffold. Product logic belongs in sibling
+        repositories; Noa should pin, install, configure, observe, and health-check them.
+  - type: textarea
+    id: need
+    attributes:
+      label: What need does this address?
+      description: Describe the operator, install, workflow, or observation problem.
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed shape
+      description: What should Noa do, and what should stay in sibling repos?
+    validations:
+      required: true
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options:
+        - install / upgrade
+        - healthcheck
+        - versions lock / pins
+        - live observer
+        - Codex review gate
+        - systemd services
+        - documentation
+        - public readiness
+        - other
+    validations:
+      required: true
+  - type: textarea
+    id: risks
+    attributes:
+      label: Risks or boundaries
+      description: Note security, privacy, generated-report, or sibling-repo boundary concerns.
+  - type: checkboxes
+    id: boundary
+    attributes:
+      label: Boundary check
+      options:
+        - label: This keeps Noa as orchestration/runtime scaffolding and does not vendor sibling source code.
+          required: true

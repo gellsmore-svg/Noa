@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Security vulnerability
+    url: https://github.com/gellsmore-svg/Noa/security
+    about: Please report suspected vulnerabilities privately rather than opening a public issue.
+  - name: Public release
+    url: https://github.com/gellsmore-svg/Noa/releases
+    about: Check the latest public baseline before reporting install or workflow issues.

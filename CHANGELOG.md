@@ -4,6 +4,9 @@
 
 - Added README badges for CI, release, and license.
 - Added public `CONTRIBUTING.md` and `SECURITY.md` guidance.
+- Added GitHub issue templates for bug reports and feature requests, with
+  privacy reminders for traces, prompts, generated reports, and `.env` values.
+- Updated the public Cairn pin to the current advertised `main` commit.
 
 ## [v0.1.0] - 2026-07-09
 

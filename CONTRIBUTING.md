@@ -29,3 +29,10 @@ health-checks sibling tools; it does not vendor their product code.
 - Better diagnostics in `health/healthcheck.sh`.
 - Safer install/upgrade checks.
 - Live-observer workflow improvements that keep raw private reports ignored.
+
+## Issues
+
+Use the GitHub issue templates for bugs and feature requests. Do not open public
+issues containing secrets, `.env` values, raw traces, generated observer
+reports, customer data, or private prompts. Use the security process for
+vulnerabilities.

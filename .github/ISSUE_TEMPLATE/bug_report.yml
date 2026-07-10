@@ -1,0 +1,67 @@
+name: Bug report
+description: Report a reproducible Noa install, workflow, or runtime scaffold problem.
+title: "Bug: "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reporting a Noa issue. Do not include secrets, `.env` values,
+        raw trace exports, generated observer reports, customer data, or private
+        prompts. Redact paths and hostnames if needed.
+  - type: textarea
+    id: problem
+    attributes:
+      label: What happened?
+      description: Describe the failure and what you expected instead.
+    validations:
+      required: true
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: How can it be reproduced?
+      description: Include commands and minimal config shape, with secrets removed.
+      placeholder: |
+        1. cp .env.example .env
+        2. VERSIONS_LOCK=versions.git.lock ./install/install.sh
+        3. ./health/healthcheck.sh
+    validations:
+      required: true
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options:
+        - install / upgrade
+        - healthcheck
+        - versions lock / pins
+        - live observer
+        - Codex review gate
+        - systemd services
+        - documentation
+        - other
+    validations:
+      required: true
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment
+      description: OS, shell, Python, Docker, Ollama, and whether this is WSL/native Linux.
+    validations:
+      required: true
+  - type: textarea
+    id: checks
+    attributes:
+      label: Checks run
+      description: Paste summarized output, not private logs.
+      placeholder: |
+        bash scripts/public_readiness_check.sh
+        bash tests/install_lib_test.sh
+        bash tests/codex_review_gate_test.sh
+  - type: checkboxes
+    id: safety
+    attributes:
+      label: Safety check
+      options:
+        - label: I have removed secrets, `.env` values, raw traces, generated reports, customer data, and private prompts.
+          required: true
