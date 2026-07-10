@@ -2,6 +2,12 @@
 
 ## [Unreleased]
 
+## [v0.1.5] - 2026-07-10
+
+- Updated the Cairn pin to `cairn-lang@v0.8.2`, bringing consuming-agent prompts
+  for HCI touchpoints, cognitive aesthetic, interface overhead, and
+  probability/impact/confidence separation into fresh Noa installs.
+
 ## [v0.1.4] - 2026-07-10
 
 - Updated integration documentation so completed Tirzah-Mahalath work is not
