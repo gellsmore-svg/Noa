@@ -16,11 +16,19 @@ jobs:
           python-version: "3.12"
       - name: Run public readiness checks
         run: bash scripts/public_readiness_check.sh
-      - name: Run clean public-lock smoke test
-        run: bash tests/public_lock_smoke_test.sh
-      - name: Run public pipx installer smoke test
-        run: bash tests/public_pipx_install_smoke_test.sh
       - name: Run installer/workflow tests
         run: bash tests/install_lib_test.sh
       - name: Run Codex review gate tests
         run: bash tests/codex_review_gate_test.sh
+
+  public-install-smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+      - name: Run clean public-lock smoke test
+        run: bash tests/public_lock_smoke_test.sh
+      - name: Run public pipx installer smoke test
+        run: bash tests/public_pipx_install_smoke_test.sh

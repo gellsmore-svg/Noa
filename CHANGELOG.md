@@ -2,6 +2,12 @@
 
 ## [Unreleased]
 
+## [v0.1.15] - 2026-07-10
+
+- Split public installation verification into its own parallel CI job, reducing
+  the normal workflow-test feedback time while preserving both clean-install
+  checks.
+
 ## [v0.1.14] - 2026-07-10
 
 - Added a clean public `pipx` installer smoke test to CI, including the
