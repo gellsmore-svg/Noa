@@ -2,6 +2,11 @@
 
 ## [Unreleased]
 
+## [v0.1.14] - 2026-07-10
+
+- Added a clean public `pipx` installer smoke test to CI, including the
+  cross-tool Galeed, Tirzah, Hoglah, Milcah, and Hanani/Keturah injections.
+
 ## [v0.1.13] - 2026-07-10
 
 - Added CI coverage that installs the entire `versions.git.lock` into a clean
