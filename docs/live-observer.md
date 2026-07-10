@@ -57,8 +57,10 @@ ${NOA_OBSERVER_OUT_DIR:-reports/live-observer}/scheduled/<UTC run id>/
 
 After each scheduled run it refreshes:
 
-- `index.md` - operator-readable rollup of reports, event totals, risk, and repeated findings.
-- `index.json` - machine-readable report summaries for future dashboards or issue creation.
+- `index.md` - operator-readable rollup of reports, matching agent-harness
+  plans, event totals, risk, and repeated findings.
+- `index.json` - machine-readable report summaries, including matching harness
+  paths when present, for future dashboards or issue creation.
 - `issue-drafts/*.md` - local GitHub-ready drafts for findings that cross the configured thresholds.
 
 Set these `.env` keys to tune it:

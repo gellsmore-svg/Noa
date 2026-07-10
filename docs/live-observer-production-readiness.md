@@ -32,6 +32,8 @@ The reproducible fresh-machine lock is `versions.git.lock`.
   report so operator or agent follow-up carries the HCI/cognitive-aesthetic
   review prompts from the pinned Cairn release.
 - Noa's scheduled observer refreshes Markdown and JSON indexes over repeated findings.
+- Noa's scheduled observer index links matching agent-harness plans when those
+  artifacts are present beside live-observer reports.
 - Noa drafts local GitHub-ready issue Markdown when findings cross repeat/risk thresholds.
 - Noa can dry-run or explicitly publish those drafts through the GitHub CLI.
 - On native Linux, `install/install.sh` renders and enables a systemd user timer for scheduled observer runs.

@@ -2,6 +2,11 @@
 
 ## [Unreleased]
 
+## [v0.1.8] - 2026-07-10
+
+- Added matching Cairn agent-harness paths to the scheduled live-observer
+  Markdown and JSON indexes.
+
 ## [v0.1.7] - 2026-07-10
 
 - Added `cairn-agent-harness-plan` to the Noa health check so missing harness

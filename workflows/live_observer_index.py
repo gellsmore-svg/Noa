@@ -17,6 +17,7 @@ FINDING_RE = re.compile(r"^- \*\*(?P<category>[^:]+): (?P<name>[^*]+)\*\* - (?P<
 @dataclass(frozen=True)
 class ReportSummary:
     path: str
+    harness_path: str | None
     title: str
     events: int
     risk: str
@@ -28,6 +29,13 @@ def _relative(path: Path, root: Path) -> str:
         return path.relative_to(root).as_posix()
     except ValueError:
         return path.as_posix()
+
+
+def _matching_harness_path(report_path: Path) -> Path:
+    name = report_path.name
+    if name.endswith("-cairn-report.md"):
+        return report_path.with_name(name.removesuffix("-cairn-report.md") + "-cairn-agent-harness.md")
+    return report_path.with_name(report_path.stem + "-agent-harness.md")
 
 
 def parse_report(path: Path, root: Path) -> ReportSummary:
@@ -51,8 +59,11 @@ def parse_report(path: Path, root: Path) -> ReportSummary:
         elif line and not line.startswith("#") and "(probability:" in line:
             risk = line.strip()
 
+    harness_path = _matching_harness_path(path)
+
     return ReportSummary(
         path=_relative(path, root),
+        harness_path=_relative(harness_path, root) if harness_path.exists() else None,
         title=title,
         events=events,
         risk=risk,
@@ -89,6 +100,8 @@ def render_markdown(summaries: list[ReportSummary], root: Path) -> str:
     for item in summaries:
         findings = ", ".join(item.findings) if item.findings else "none observed"
         lines.append(f"- `{item.path}` - {item.events} event(s), risk {item.risk}")
+        if item.harness_path:
+            lines.append(f"  Agent harness: `{item.harness_path}`")
         lines.append(f"  Findings: {findings}")
 
     lines.append("")

@@ -328,6 +328,12 @@ Events: 3
 ## Risk
 moderate (probability: medium; impact: medium; confidence: medium)
 MD
+cat > "$index_root/run-a/trace-a-cairn-agent-harness.md" <<'MD'
+# Trace A Agent Harness
+
+## Consuming Agent Prompts
+- Use deterministic Cairn tools.
+MD
 cat > "$index_root/run-b/trace-b-cairn-report.md" <<'MD'
 # Trace B
 
@@ -347,8 +353,12 @@ grep -q "Events: 8" "$index_root/index.md" \
   || { echo "expected observer index event total" >&2; exit 1; }
 grep -q "human_load: queue vigilance load: 2" "$index_root/index.md" \
   || { echo "expected repeated finding count" >&2; exit 1; }
+grep -q 'Agent harness: `run-a/trace-a-cairn-agent-harness.md`' "$index_root/index.md" \
+  || { echo "expected observer index to link harness guidance" >&2; exit 1; }
 grep -q '"title": "Trace A"' "$index_root/index.json" \
   || { echo "expected observer index JSON" >&2; exit 1; }
+grep -q '"harness_path": "run-a/trace-a-cairn-agent-harness.md"' "$index_root/index.json" \
+  || { echo "expected observer index JSON harness path" >&2; exit 1; }
 
 echo "live_observer index workflow: pass"
 
