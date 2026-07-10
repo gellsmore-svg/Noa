@@ -255,9 +255,23 @@ printf '{"kind":"agent_output"}\n' > "$observations"
 printf '# %s\n' "$title" > "$report"
 SH
 chmod +x "$tmp/bin/cairn-galeed-observe"
+cat > "$tmp/bin/cairn-agent-harness-plan" <<'SH'
+#!/usr/bin/env bash
+printf '%s\n' "$*" > "$MOCK_HARNESS_ARGS"
+while [ "$#" -gt 0 ]; do
+  case "$1" in
+    --output) output="$2"; shift 2 ;;
+    --title) title="$2"; shift 2 ;;
+    *) shift ;;
+  esac
+done
+printf '# %s\n\n## Consuming Agent Prompts\n- Use Cairn deterministic tools.\n' "$title" > "$output"
+SH
+chmod +x "$tmp/bin/cairn-agent-harness-plan"
 
 observer_out="$tmp/observer"
 PATH="$tmp/bin:$PATH" MOCK_GALEED_ARGS="$tmp/galeed.args" MOCK_CAIRN_ARGS="$tmp/cairn.args" \
+  MOCK_HARNESS_ARGS="$tmp/harness.args" \
   "$ROOT/workflows/live_observer.sh" --trace trace_demo --limit 5 --title "Observer Test" \
   --out-dir "$observer_out" >/dev/null
 
@@ -265,17 +279,22 @@ grep -q -- "events --trace trace_demo --limit 5 --json" "$tmp/galeed.args" \
   || { echo "expected galeed trace export args" >&2; exit 1; }
 grep -q -- "--title Observer Test" "$tmp/cairn.args" \
   || { echo "expected Cairn observer title" >&2; exit 1; }
+grep -q -- "--title Observer Test agent harness" "$tmp/harness.args" \
+  || { echo "expected agent harness title" >&2; exit 1; }
 test -s "$observer_out/trace-trace_demo-galeed-events.json" \
   || { echo "expected Galeed export file" >&2; exit 1; }
 test -s "$observer_out/trace-trace_demo-cairn-observations.jsonl" \
   || { echo "expected Cairn observations file" >&2; exit 1; }
 test -s "$observer_out/trace-trace_demo-cairn-report.md" \
   || { echo "expected Cairn report file" >&2; exit 1; }
+test -s "$observer_out/trace-trace_demo-cairn-agent-harness.md" \
+  || { echo "expected Cairn agent harness file" >&2; exit 1; }
 
 echo "live_observer workflow command chain: pass"
 
 scheduled_out="$tmp/scheduled-observer"
 PATH="$tmp/bin:$PATH" MOCK_GALEED_ARGS="$tmp/galeed.args" MOCK_CAIRN_ARGS="$tmp/cairn.args" \
+  MOCK_HARNESS_ARGS="$tmp/harness.args" \
   NOA_OBSERVER_RUN_ID=20260708T120000Z \
   NOA_OBSERVER_SCHEDULED_OUT_DIR="$scheduled_out" \
   NOA_OBSERVER_SESSION_ID=sess_demo \
@@ -289,6 +308,8 @@ grep -q -- "--title Scheduled Observer Test" "$tmp/cairn.args" \
   || { echo "expected scheduled observer title" >&2; exit 1; }
 test -s "$scheduled_out/20260708T120000Z/session-sess_demo-cairn-report.md" \
   || { echo "expected scheduled observer timestamped report" >&2; exit 1; }
+test -s "$scheduled_out/20260708T120000Z/session-sess_demo-cairn-agent-harness.md" \
+  || { echo "expected scheduled observer timestamped harness guidance" >&2; exit 1; }
 test -s "$scheduled_out/index.md" \
   || { echo "expected scheduled observer index" >&2; exit 1; }
 
@@ -399,6 +420,7 @@ SH
 chmod +x "$tmp/bin/cairn-galeed-observe"
 
 if PATH="$tmp/bin:$PATH" MOCK_GALEED_ARGS="$tmp/galeed.args" MOCK_CAIRN_ARGS="$tmp/cairn.args" \
+  MOCK_HARNESS_ARGS="$tmp/harness.args" \
   MOCK_GALEED_EMPTY=1 "$ROOT/workflows/live_observer.sh" --trace empty --out-dir "$observer_out/empty" \
   >/dev/null 2>"$tmp/empty.err"; then
   echo "expected empty Galeed export to fail without --allow-empty" >&2
@@ -407,6 +429,7 @@ fi
 grep -q 'Galeed export contains no events' "$tmp/empty.err" \
   || { echo "expected empty export diagnostic" >&2; exit 1; }
 PATH="$tmp/bin:$PATH" MOCK_GALEED_ARGS="$tmp/galeed.args" MOCK_CAIRN_ARGS="$tmp/cairn.args" \
+  MOCK_HARNESS_ARGS="$tmp/harness.args" \
   MOCK_GALEED_EMPTY=1 "$ROOT/workflows/live_observer.sh" --trace empty --allow-empty \
   --out-dir "$observer_out/empty-allowed" >/dev/null
 

@@ -2,6 +2,13 @@
 
 ## [Unreleased]
 
+## [v0.1.6] - 2026-07-10
+
+- Added a companion Cairn agent-harness plan to live-observer runs so each
+  report carries consuming-agent guidance for deterministic Cairn tooling,
+  HCI touchpoints, cognitive aesthetic, interface overhead, and
+  probability/impact/confidence/evidence separation.
+
 ## [v0.1.5] - 2026-07-10
 
 - Updated the Cairn pin to `cairn-lang@v0.8.2`, bringing consuming-agent prompts

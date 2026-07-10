@@ -28,6 +28,9 @@ The reproducible fresh-machine lock is `versions.git.lock`.
 - Noa CI runs the public-readiness, installer/workflow, and Codex review-gate tests on pushes and pull requests to `main`.
 - Noa's live observer fails on an empty Galeed export by default, with `--allow-empty` reserved for deliberate baseline tests.
 - Noa's scheduled observer wrapper writes timestamped report directories.
+- Noa's live observer writes a companion Cairn agent-harness plan beside each
+  report so operator or agent follow-up carries the HCI/cognitive-aesthetic
+  review prompts from the pinned Cairn release.
 - Noa's scheduled observer refreshes Markdown and JSON indexes over repeated findings.
 - Noa drafts local GitHub-ready issue Markdown when findings cross repeat/risk thresholds.
 - Noa can dry-run or explicitly publish those drafts through the GitHub CLI.

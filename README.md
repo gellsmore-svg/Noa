@@ -44,8 +44,8 @@ environment, separate from any dev checkout or virtualenv.
 - `workflows/codex_review_gate.py` — wraps `codex exec --json --output-schema`
   with the Cairn/Milcah acceptance gate.
 - `workflows/live_observer.sh` — exports Galeed trace events and produces a
-  Cairn live-observation report for human-load, agent-effectiveness, and runtime
-  findings.
+  Cairn live-observation report plus agent-harness guidance for human-load,
+  agent-effectiveness, HCI/cognitive-aesthetic follow-up, and runtime findings.
 - `workflows/live_observer_scheduled.sh` — runs the live observer into a
   timestamped report folder; `install.sh` enables it as a systemd user timer on
   native Linux.
@@ -71,7 +71,7 @@ Upgrades (after bumping `versions.lock`):
 ```
 
 ## Status
-**Public baseline:** `v0.1.5` is live at
+**Public baseline:** `v0.1.6` is live at
 [github.com/gellsmore-svg/Noa](https://github.com/gellsmore-svg/Noa). Public
 CI passes for readiness checks, installer/workflow tests, and the Codex
 review-gate workflow. GitHub Discussions are enabled for design/process

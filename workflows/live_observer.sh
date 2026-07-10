@@ -58,6 +58,14 @@ if [ -z "$CAIRN_GALEED_OBSERVE" ]; then
     exit 1
   fi
 fi
+CAIRN_AGENT_HARNESS_PLAN="${CAIRN_AGENT_HARNESS_PLAN:-}"
+if [ -z "$CAIRN_AGENT_HARNESS_PLAN" ]; then
+  if command -v cairn-agent-harness-plan >/dev/null; then
+    CAIRN_AGENT_HARNESS_PLAN="$(command -v cairn-agent-harness-plan)"
+  elif [ -x "$HOME/domains/Cairn/.venv/bin/cairn-agent-harness-plan" ]; then
+    CAIRN_AGENT_HARNESS_PLAN="$HOME/domains/Cairn/.venv/bin/cairn-agent-harness-plan"
+  fi
+fi
 
 MONGO_URI="${HOGLAH_GALEED_MONGO_URI:-${TIRZAH_MONGO_URI:-${MONGO_URI:-mongodb://localhost:27017}}}"
 MONGO_DB="${HOGLAH_GALEED_MONGO_DB:-${TIRZAH_MONGO_DB:-mnemosyne_dev}}"
@@ -77,8 +85,9 @@ safe_label="$(printf '%s' "$label" | tr -c 'A-Za-z0-9_.-' '_')"
 events_json="$OUT_DIR/${safe_label}-galeed-events.json"
 observations_jsonl="$OUT_DIR/${safe_label}-cairn-observations.jsonl"
 report_md="$OUT_DIR/${safe_label}-cairn-report.md"
+harness_md="$OUT_DIR/${safe_label}-cairn-agent-harness.md"
 
-echo "==> 1/2  Export Galeed events from $MONGO_DB"
+echo "==> 1/3  Export Galeed events from $MONGO_DB"
 galeed events "${filter_args[@]}" --limit "$LIMIT" --json \
   --mongo-uri "$MONGO_URI" --mongo-db "$MONGO_DB" > "$events_json"
 event_count="$(python3 - "$events_json" <<'PY'
@@ -103,12 +112,25 @@ if [ "$event_count" -eq 0 ] && [ "$ALLOW_EMPTY" != "true" ]; then
   exit 3
 fi
 
-echo "==> 2/2  Analyse with Cairn"
+echo "==> 2/3  Analyse with Cairn"
 "$CAIRN_GALEED_OBSERVE" "$events_json" \
   --title "$TITLE" \
   --observations-output "$observations_jsonl" \
   --output "$report_md"
 
+if [ -n "$CAIRN_AGENT_HARNESS_PLAN" ]; then
+  echo "==> 3/3  Generate Cairn agent harness guidance"
+  "$CAIRN_AGENT_HARNESS_PLAN" \
+    --repo "$ROOT" \
+    --title "$TITLE agent harness" \
+    --output-dir "$OUT_DIR" \
+    --format markdown \
+    --output "$harness_md"
+else
+  echo "cairn-agent-harness-plan not on PATH; skipping harness guidance artifact." >&2
+fi
+
 echo "Galeed export:       $events_json"
 echo "Cairn observations:  $observations_jsonl"
 echo "Cairn report:        $report_md"
+echo "Agent harness:       $harness_md"

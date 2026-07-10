@@ -23,11 +23,15 @@ or for a whole session:
   --title "Noa session sess_123"
 ```
 
-The workflow writes three files under `reports/live-observer/`:
+The workflow writes four files under `reports/live-observer/`:
 
 - the raw Galeed event export,
 - the Cairn observation JSONL,
 - the Cairn live-observation Markdown report.
+- a Cairn agent-harness Markdown plan that reminds consuming agents to use
+  deterministic Cairn tools, inspect HCI touchpoints, separate business work
+  from interface overhead, assess cognitive aesthetic, and distinguish
+  probability, impact, confidence, and evidence.
 
 See `docs/examples/hoglah-live-observer-sample.md` for a real local Hoglah
 session report that surfaced queue vigilance load and long queue lifecycles.
