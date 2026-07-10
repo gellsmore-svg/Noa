@@ -10,6 +10,7 @@
   privacy reminders for traces, prompts, generated reports, and `.env` values.
 - Added a pull request template with boundary, privacy, and validation checks.
 - Enabled GitHub Discussions for public design/process conversations.
+- Seeded the first public Discussions announcement for the `v0.1.1` baseline.
 - Replaced public commit pins with release tags across the sibling lockfile.
 - Updated the public Cairn pin to `cairn-lang@v0.8.1`.
 - Promoted the Cairn -> Deborah/Huldah split note to an approved pre-execution

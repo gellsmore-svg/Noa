@@ -37,6 +37,13 @@ issues containing secrets, `.env` values, raw traces, generated observer
 reports, customer data, or private prompts. Use the security process for
 vulnerabilities.
 
+## Discussions
+
+Use [GitHub Discussions](https://github.com/gellsmore-svg/Noa/discussions) for
+design questions, install experience, public lockfile/tag strategy, and broader
+family-stack coordination. Use issues for actionable bugs or scoped feature
+requests.
+
 ## Pull Requests
 
 Use the pull request template and complete the validation checklist. If a change

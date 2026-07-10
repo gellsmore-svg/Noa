@@ -4,6 +4,8 @@
 [![Release](https://img.shields.io/github/v/release/gellsmore-svg/Noa)](https://github.com/gellsmore-svg/Noa/releases)
 [![License](https://img.shields.io/github/license/gellsmore-svg/Noa)](LICENSE)
 
+Public discussion: [Noa v0.1.1 public baseline](https://github.com/gellsmore-svg/Noa/discussions/6)
+
 **Noa** is the orchestration sibling for the local AI stack: **Mahalath** (semantic
 precision), **Tirzah** (memory/retrieval), **Hoglah** (serialized LLM queue), and
 later **Milcah** (coherence engine). It does **not** replace those projects — it
@@ -72,7 +74,8 @@ Upgrades (after bumping `versions.lock`):
 **Public baseline:** `v0.1.1` is live at
 [github.com/gellsmore-svg/Noa](https://github.com/gellsmore-svg/Noa). Public
 CI passes for readiness checks, installer/workflow tests, and the Codex
-review-gate workflow.
+review-gate workflow. GitHub Discussions are enabled for design/process
+conversation that does not belong in bug reports.
 
 The stack is Mahalath + Tirzah + Hoglah + Galeed + Keturah + Cairn + Milcah,
 with Noa providing installation, configuration, health checks, and observer
