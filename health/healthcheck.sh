@@ -58,7 +58,7 @@ else
 fi
 
 # CLIs on PATH
-for tool in mahalath tirzah hoglah milcah galeed cairn-galeed-observe cairn-agent-harness-plan; do
+for tool in mahalath tirzah hoglah milcah hanani galeed cairn-galeed-observe cairn-agent-harness-plan; do
   if command -v "$tool" >/dev/null 2>&1; then
     ok "$tool: $(tool_label "$tool")"
   else

@@ -2,6 +2,11 @@
 
 ## [Unreleased]
 
+## [v0.1.10] - 2026-07-10
+
+- Added Hanani install health coverage and Keturah MCP injection for local
+  Hanani pins.
+
 ## [v0.1.9] - 2026-07-10
 
 - Added matching Cairn agent-harness links to live-observer issue drafts.

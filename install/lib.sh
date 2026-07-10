@@ -255,6 +255,32 @@ inject_milcah_into_keturah() {
     || warn "milcah inject into keturah failed — tirzah.coherence_check will be unavailable."
 }
 
+# Hanani's reasoning-slice MCP handlers are discovered by Keturah at runtime.
+# Inject Hanani into Keturah's isolated MCP venv so coding agents can call the
+# federated `hanani.*` / short-form handlers instead of seeing only the core
+# Keturah and Tirzah surfaces.
+inject_hanani_into_keturah() {
+  local root="$1" lock raw spec wheelhouse
+  local pip_arg pip_args=()
+  pipx list 2>/dev/null | grep -q "package keturah" || return 0
+  lock="$(versions_lock "$root")"
+  raw="$(awk '$1 == "hanani" { print $3; exit }' "$lock")"
+  [ -n "$raw" ] \
+    || { info "hanani is not pinned — skipping Hanani MCP federation."; return 0; }
+  spec="$(pip_spec "hanani" "" "$raw")" \
+    || { warn "hanani source missing — Hanani MCP federation will stay unavailable."; return 0; }
+  if [ -z "${NOA_BUILT_WHEELHOUSE:-}" ]; then
+    build_family_wheelhouse "$root"
+  fi
+  wheelhouse="${NOA_BUILT_WHEELHOUSE:-${NOA_WHEELHOUSE:-$HOME/.cache/noa/wheelhouse}}"
+  if pip_arg="$(_family_wheelhouse_pip_arg "$root" "$wheelhouse")"; then
+    pip_args=(--pip-args "$pip_arg")
+  fi
+  info "inject hanani into keturah (MCP intelligence synthesis tools)"
+  pipx inject --force keturah ${pip_args[@]+"${pip_args[@]}"} "$spec" >/dev/null 2>&1 \
+    || warn "hanani inject into keturah failed — Hanani MCP tools will be unavailable."
+}
+
 # The trace spine: galeed is a library (not on PyPI, no console app), so it is
 # injected into each tool's isolated pipx env from the lock source. Hoglah also
 # gets pymongo (its core is Mongo-free) so job events persist rather than being
@@ -265,7 +291,7 @@ inject_galeed() {
   raw="$(grep -E '^galeed ' "$lock" | awk '{print $3}')"
   spec="$(pip_spec "galeed" "" "$raw")" \
     || { warn "galeed source missing — trace-spine emission stays a no-op."; return 0; }
-  for tool in hoglah mahalath tirzah milcah; do
+  for tool in hoglah mahalath tirzah milcah hanani; do
     pipx list 2>/dev/null | grep -q "package $tool" || continue
     info "inject galeed into $tool (family trace spine)"
     pipx inject --force "$tool" "$spec" >/dev/null 2>&1 \

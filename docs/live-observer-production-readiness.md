@@ -43,6 +43,9 @@ The reproducible fresh-machine lock is `versions.git.lock`.
 - Noa health checks verify both `cairn-galeed-observe` and
   `cairn-agent-harness-plan`, because both are needed for the full live-observer
   artifact set.
+- Noa installs Hanani from the local lock and injects it into Keturah's MCP venv
+  when pinned, so coding agents can call Hanani reasoning-slice tools through
+  the family MCP surface.
 - Cairn live-observer CLIs now return clean errors for invalid input and output-write failures.
 - Hoglah emits queue lifecycle duration metadata to Galeed.
 - Galeed exposes a producer helper for Cairn-readable observations.

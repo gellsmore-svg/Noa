@@ -71,15 +71,15 @@ Upgrades (after bumping `versions.lock`):
 ```
 
 ## Status
-**Public baseline:** `v0.1.9` is live at
+**Public baseline:** `v0.1.10` is live at
 [github.com/gellsmore-svg/Noa](https://github.com/gellsmore-svg/Noa). Public
 CI passes for readiness checks, installer/workflow tests, and the Codex
 review-gate workflow. GitHub Discussions are enabled for design/process
 conversation that does not belong in bug reports.
 
-The stack is Mahalath + Tirzah + Hoglah + Galeed + Keturah + Cairn + Milcah,
-with Noa providing installation, configuration, health checks, and observer
-workflows. The current reproducible fresh-machine lock is
+The stack is Mahalath + Tirzah + Hoglah + Hanani + Galeed + Keturah + Cairn +
+Milcah, with Noa providing installation, configuration, health checks, and
+observer workflows. The current reproducible fresh-machine lock is
 [`versions.git.lock`](versions.git.lock).
 
 ## Hard rule

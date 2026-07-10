@@ -29,7 +29,7 @@ if [ "$1" = runpip ]; then
   exit 0
 fi
 if [ "$1" = list ]; then
-  printf 'package hoglah\npackage keturah\npackage mahalath\npackage tirzah\npackage milcah\n'
+  printf 'package hoglah\npackage keturah\npackage mahalath\npackage tirzah\npackage milcah\npackage hanani\n'
   exit 0
 fi
 exit 0
@@ -194,6 +194,43 @@ grep -q -- "inject --force keturah .*milcah\\[hoglah,galeed\\] @ file://$tmp/mil
   || { echo "expected milcah inject into keturah app venv" >&2; exit 1; }
 
 echo "install_lib keturah milcah injection: pass"
+
+# Hanani installs as an APP and is injected into Keturah's MCP venv so its
+# reasoning-slice handlers are visible to coding agents.
+mkdir -p "$tmp/hananisrc/src/hanani"
+cat > "$tmp/hananisrc/pyproject.toml" <<'TOML'
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "hanani"
+version = "0.4.0"
+dependencies = ["keturah>=0.1"]
+
+[project.scripts]
+hanani = "hanani.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+TOML
+touch "$tmp/hananisrc/src/hanani/__init__.py"
+printf 'keturah 0.2.0 %s\nhanani 0.4.0 %s\n' \
+  "$tmp/keturahsrc" "$tmp/hananisrc" > "$tmp/versions.lock"
+: > "$tmp/install.log"
+PATH="$tmp/bin:$PATH" VERSIONS_LOCK="$tmp/versions.lock" MOCK_VERSION=0.4.0 \
+  MOCK_LOG="$tmp/install.log" install_pinned_tools "$ROOT" >/dev/null 2>&1
+grep -q -- "install --force --pip-args .*hanani @ file://$tmp/hananisrc" "$tmp/install.log" \
+  || { echo "expected hanani app install" >&2; exit 1; }
+
+: > "$tmp/install.log"
+unset NOA_BUILT_WHEELHOUSE
+PATH="$tmp/bin:$PATH" VERSIONS_LOCK="$tmp/versions.lock" MOCK_LOG="$tmp/install.log" \
+  inject_hanani_into_keturah "$ROOT" >/dev/null 2>&1
+grep -q -- "inject --force keturah .*hanani @ file://$tmp/hananisrc" "$tmp/install.log" \
+  || { echo "expected hanani inject into keturah app venv" >&2; exit 1; }
+
+echo "install_lib hanani app and keturah injection: pass"
 
 # cairn-lang also installs as an APP (the view composer) with its web extra, even
 # though it is a family library injected into tool venvs elsewhere.
@@ -497,6 +534,10 @@ for tool in mahalath tirzah hoglah milcah galeed; do
 echo "$tool 0.test"
 SH
 done
+cat > "$tmp/bin/hanani" <<'SH'
+#!/usr/bin/env bash
+echo "hanani 0.test"
+SH
 cat > "$tmp/bin/cairn-galeed-observe" <<'SH'
 #!/usr/bin/env bash
 if [ "${1:-}" = "--help" ]; then
@@ -515,7 +556,7 @@ exit 2
 SH
 chmod +x "$tmp/bin"/curl "$tmp/bin"/mongosh "$tmp/bin"/systemctl \
   "$tmp/bin"/mahalath "$tmp/bin"/tirzah "$tmp/bin"/hoglah "$tmp/bin"/milcah \
-  "$tmp/bin"/galeed "$tmp/bin"/cairn-galeed-observe "$tmp/bin"/cairn-agent-harness-plan
+  "$tmp/bin"/hanani "$tmp/bin"/galeed "$tmp/bin"/cairn-galeed-observe "$tmp/bin"/cairn-agent-harness-plan
 
 health_out="$(PATH="$tmp/bin:$PATH" "$ROOT/health/healthcheck.sh")"
 printf '%s' "$health_out" | grep -q 'cairn-galeed-observe: usage: cairn-galeed-observe' \
