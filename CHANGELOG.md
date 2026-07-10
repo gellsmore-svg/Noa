@@ -2,6 +2,11 @@
 
 ## [Unreleased]
 
+## [v0.1.16] - 2026-07-11
+
+- Extended the public `pipx` installer smoke test to verify Keturah's
+  federated Tirzah and Hanani MCP tools after all runtime injections.
+
 ## [v0.1.15] - 2026-07-10
 
 - Split public installation verification into its own parallel CI job, reducing

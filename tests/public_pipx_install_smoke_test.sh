@@ -33,4 +33,12 @@ for tool in mahalath tirzah hoglah milcah hanani galeed cairn-galeed-observe cai
   "$PIPX_BIN_DIR/$tool" --help >/dev/null
 done
 
+mcp_tools="$(printf '%s\n' \
+  '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{}}' \
+  '{"jsonrpc":"2.0","id":2,"method":"tools/list","params":{}}' \
+  | "$PIPX_BIN_DIR/keturah-mcp")"
+for tool in tirzah.search_memory tirzah.coherence_check hanani.ingest_and_assess hanani.analyze_gaps; do
+  grep -Fq "\"name\": \"$tool\"" <<< "$mcp_tools"
+done
+
 echo "public pipx installer smoke: pass"
