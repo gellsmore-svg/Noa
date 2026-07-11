@@ -2,6 +2,12 @@
 
 ## [Unreleased]
 
+## [v0.1.18] - 2026-07-11
+
+- Extended the public Keturah MCP smoke to ingest a Hanani article and execute
+  `hanani.map_relations`, proving persisted relation output as well as tool
+  discovery.
+
 ## [v0.1.17] - 2026-07-11
 
 - Promoted the public Hanani lock to `0.8.0`, including Fable's
