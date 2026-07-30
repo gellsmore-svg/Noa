@@ -7,9 +7,11 @@
 Public discussion: [Noa v0.1.1 public baseline](https://github.com/gellsmore-svg/Noa/discussions/6)
 
 **Noa** is the orchestration sibling for the local AI stack: **Mahalath** (semantic
-precision), **Tirzah** (memory/retrieval), **Hoglah** (serialized LLM queue), and
-later **Milcah** (coherence engine). It does **not** replace those projects — it
-*installs, configures, and runs them together* as a stable, production-like local
+precision), **Tirzah** (memory/retrieval), **Hoglah** (serialized LLM queue),
+**Milcah** (coherence engine), **Galeed** (trace/log spine), **Keturah**
+(capability manifest / MCP bridge), **Cairn** (process language), and **Hanani**
+(evidence synthesis). It does **not** replace those projects — it *installs,
+configures, and runs them together* as a stable, production-like local
 environment, separate from any dev checkout or virtualenv.
 
 > Named for the fifth daughter of Zelophehad (Mahlah→Mahalath, Noa, Hoglah, Milcah,
@@ -36,7 +38,9 @@ environment, separate from any dev checkout or virtualenv.
   restart, survives logout via linger) and falls back to a background process on
   WSL / no-systemd.
 - `health/healthcheck.sh` — is Ollama reachable? Mongo up? queue writable? CLIs present?
-- `config/` — per-tool config templates, rendered from `.env`.
+- Per-tool config is **rendered inline from `.env`** at install time (see
+  `render_tirzah_config` / `render_mcp_server_config` in `install/lib.sh`) — there is
+  no `config/` template directory, and an existing config file is never clobbered.
 - `workflows/ingest_document.sh <file>` — **integrated ingestion**: Mahalath ingests
   + extracts the document's MPL terms first, then Tirzah ingests the same document, so
   retrieval resolves against those terms.
@@ -80,12 +84,37 @@ conversation that does not belong in bug reports.
 The stack is Mahalath + Tirzah + Hoglah + Hanani + Galeed + Keturah + Cairn +
 Milcah, with Noa providing installation, configuration, health checks, and
 observer workflows. The current reproducible fresh-machine lock is
-[`versions.git.lock`](versions.git.lock).
+[`versions.git.lock`](versions.git.lock):
+
+| Sibling | Pinned | Role |
+|---|---|---|
+| `mahalath` | 1.1.0 | Multi-agent ontology builder (semantic precision) |
+| `tirzah` | 1.12.0 | Graph memory and retrieval |
+| `hoglah` | 0.9.0 | Serialized LLM job queue |
+| `galeed` | 0.2.0 | Trace/log spine |
+| `hanani` | 0.8.0 | Evidence synthesis |
+| `keturah` | 0.3.0 | Capability manifest / MCP bridge |
+| `cairn-lang` | 0.8.2 | Process language |
+| `milcah` | 0.2.0 | Coherence engine |
+
+All eight siblings are **built and pinned** — none are deferred. Milcah's v0.2
+core in particular is live, not planned.
+
+### Local endpoints after install
+| Service | Address | Start with |
+|---|---|---|
+| MongoDB | `127.0.0.1:27017` | `compose.yaml` (always-up) |
+| Ollama | `$OLLAMA_BASE_URL` (host, not containerised) | host service |
+| Cairn process views | `http://127.0.0.1:8795` | `cairn-serve` — compose views, save as templates |
+| Galeed trace API | `http://127.0.0.1:8785` | `galeed serve` (needs `galeed[web]`); browse with Mizpah |
+| Hanani docs | `http://127.0.0.1:8805` | `hanani docs serve` |
+
+For a terminal-only trace view, `galeed trace --follow`.
 
 ## Hard rule
 Noa **orchestrates, it does not vendor.** It pins *released* versions of the siblings
 and installs them; it never copies their code. Contents stay limited to compose +
-config templates + scripts + docs.
+env/config rendering + scripts + docs.
 
 For public use, think of Noa as the runtime scaffold for the family stack: it
 documents and automates how the sibling tools are installed, configured,
