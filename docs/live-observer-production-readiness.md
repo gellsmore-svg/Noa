@@ -5,7 +5,7 @@ Date: 2026-07-08
 This is the current production-readiness snapshot for the Noa live-observer path:
 
 ```text
-Galeed trace events -> Cairn observations -> Cairn live-observer report -> Noa workflow artifacts
+Galeed trace events -> Cairn-format observations -> Huldah live-observer report -> Noa workflow artifacts
 ```
 
 ## Current Pins
@@ -39,14 +39,14 @@ The reproducible fresh-machine lock is `versions.git.lock`.
   index recorded them.
 - Noa can dry-run or explicitly publish those drafts through the GitHub CLI.
 - On native Linux, `install/install.sh` renders and enables a systemd user timer for scheduled observer runs.
-- Noa can fall back to a local Cairn virtualenv when `cairn-galeed-observe` is not on `PATH`.
-- Noa health checks verify both `cairn-galeed-observe` and
-  `cairn-agent-harness-plan`, because both are needed for the full live-observer
+- Noa can fall back to a local Huldah virtualenv when `huldah-galeed-observe` is not on `PATH`.
+- Noa health checks verify both `huldah-galeed-observe` and
+  `huldah-agent-harness-plan`, because both are needed for the full live-observer
   artifact set.
 - Noa installs Hanani from the local lock and injects it into Keturah's MCP venv
   when pinned, so coding agents can call Hanani reasoning-slice tools through
   the family MCP surface.
-- Cairn live-observer CLIs now return clean errors for invalid input and output-write failures.
+- Huldah live-observer CLIs now return clean errors for invalid input and output-write failures.
 - Hoglah emits queue lifecycle duration metadata to Galeed.
 - Galeed exposes a producer helper for Cairn-readable observations.
 

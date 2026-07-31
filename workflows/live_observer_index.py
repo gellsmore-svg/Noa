@@ -1,5 +1,10 @@
 #!/usr/bin/env python3
-"""Build an operator index from Cairn live-observer Markdown reports."""
+"""Build an operator index from Huldah live-observer Markdown reports.
+
+The `*-cairn-report.md` suffix is unchanged: it names the observation
+format (which kept the Cairn name through the Deborah/Huldah split), and
+renaming it would orphan artifacts already published.
+"""
 
 from __future__ import annotations
 

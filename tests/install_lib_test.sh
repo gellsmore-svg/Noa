@@ -48,7 +48,7 @@ fi
 echo "install_lib version enforcement: pass"
 
 # Family libraries in the lock are built into a local wheelhouse and exposed to
-# every app install via --find-links (they are not on PyPI; 'cairn' there is an
+# every app install via --find-links (they are not on PyPI; a same-named PyPI project is an
 # unrelated project).
 mkdir -p "$tmp/libsrc"
 cat > "$tmp/libsrc/pyproject.toml" <<'TOML'
@@ -232,32 +232,32 @@ grep -q -- "inject --force keturah .*hanani @ file://$tmp/hananisrc" "$tmp/insta
 
 echo "install_lib hanani app and keturah injection: pass"
 
-# cairn-lang also installs as an APP (the view composer) with its web extra, even
+# deborah also installs as an APP (the view composer) with its web extra, even
 # though it is a family library injected into tool venvs elsewhere.
-mkdir -p "$tmp/cairnsrc/src/cairn"
-cat > "$tmp/cairnsrc/pyproject.toml" <<'TOML'
+mkdir -p "$tmp/deborahsrc/src/deborah"
+cat > "$tmp/deborahsrc/pyproject.toml" <<'TOML'
 [build-system]
 requires = ["setuptools>=68", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "cairn-lang"
+name = "deborah"
 version = "0.6.0"
 
 [tool.setuptools.packages.find]
 where = ["src"]
 TOML
-touch "$tmp/cairnsrc/src/cairn/__init__.py"
-printf 'hoglah 0.8.0 %s\ngaleed 0.1.0 %s\ncairn-lang 0.6.0 %s\n' \
-  "$tmp/source" "$tmp/libsrc" "$tmp/cairnsrc" > "$tmp/versions.lock"
+touch "$tmp/deborahsrc/src/deborah/__init__.py"
+printf 'hoglah 0.8.0 %s\ngaleed 0.1.0 %s\ndeborah 0.9.0 %s\n' \
+  "$tmp/source" "$tmp/libsrc" "$tmp/deborahsrc" > "$tmp/versions.lock"
 : > "$tmp/install.log"
 PATH="$tmp/bin:$PATH" VERSIONS_LOCK="$tmp/versions.lock" MOCK_VERSION=0.6.0 \
-  MOCK_LOG="$tmp/install.log" install_cairn_app "$ROOT" >/dev/null 2>&1
+  MOCK_LOG="$tmp/install.log" install_deborah_app "$ROOT" >/dev/null 2>&1
 
-grep -q -- "cairn-lang\[web\] @ file://$tmp/cairnsrc" "$tmp/install.log" \
-  || { echo "expected cairn-lang app install with the web extra" >&2; exit 1; }
+grep -q -- "deborah\[web\] @ file://$tmp/deborahsrc" "$tmp/install.log" \
+  || { echo "expected deborah app install with the web extra" >&2; exit 1; }
 
-echo "install_lib cairn app install: pass"
+echo "install_lib deborah app install: pass"
 
 bash -n "$ROOT/workflows/live_observer.sh"
 echo "live_observer workflow syntax: pass"
@@ -274,9 +274,9 @@ cat <<'JSON'
 JSON
 SH
 chmod +x "$tmp/bin/galeed"
-cat > "$tmp/bin/cairn-galeed-observe" <<'SH'
+cat > "$tmp/bin/huldah-galeed-observe" <<'SH'
 #!/usr/bin/env bash
-printf '%s\n' "$*" > "$MOCK_CAIRN_ARGS"
+printf '%s\n' "$*" > "$MOCK_HULDAH_ARGS"
 input="$1"
 shift
 while [ "$#" -gt 0 ]; do
@@ -291,8 +291,8 @@ test -s "$input"
 printf '{"kind":"agent_output"}\n' > "$observations"
 printf '# %s\n' "$title" > "$report"
 SH
-chmod +x "$tmp/bin/cairn-galeed-observe"
-cat > "$tmp/bin/cairn-agent-harness-plan" <<'SH'
+chmod +x "$tmp/bin/huldah-galeed-observe"
+cat > "$tmp/bin/huldah-agent-harness-plan" <<'SH'
 #!/usr/bin/env bash
 printf '%s\n' "$*" > "$MOCK_HARNESS_ARGS"
 while [ "$#" -gt 0 ]; do
@@ -302,35 +302,35 @@ while [ "$#" -gt 0 ]; do
     *) shift ;;
   esac
 done
-printf '# %s\n\n## Consuming Agent Prompts\n- Use Cairn deterministic tools.\n' "$title" > "$output"
+printf '# %s\n\n## Consuming Agent Prompts\n- Use Huldah deterministic tools.\n' "$title" > "$output"
 SH
-chmod +x "$tmp/bin/cairn-agent-harness-plan"
+chmod +x "$tmp/bin/huldah-agent-harness-plan"
 
 observer_out="$tmp/observer"
-PATH="$tmp/bin:$PATH" MOCK_GALEED_ARGS="$tmp/galeed.args" MOCK_CAIRN_ARGS="$tmp/cairn.args" \
+PATH="$tmp/bin:$PATH" MOCK_GALEED_ARGS="$tmp/galeed.args" MOCK_HULDAH_ARGS="$tmp/huldah.args" \
   MOCK_HARNESS_ARGS="$tmp/harness.args" \
   "$ROOT/workflows/live_observer.sh" --trace trace_demo --limit 5 --title "Observer Test" \
   --out-dir "$observer_out" >/dev/null
 
 grep -q -- "events --trace trace_demo --limit 5 --json" "$tmp/galeed.args" \
   || { echo "expected galeed trace export args" >&2; exit 1; }
-grep -q -- "--title Observer Test" "$tmp/cairn.args" \
-  || { echo "expected Cairn observer title" >&2; exit 1; }
+grep -q -- "--title Observer Test" "$tmp/huldah.args" \
+  || { echo "expected Huldah observer title" >&2; exit 1; }
 grep -q -- "--title Observer Test agent harness" "$tmp/harness.args" \
   || { echo "expected agent harness title" >&2; exit 1; }
 test -s "$observer_out/trace-trace_demo-galeed-events.json" \
   || { echo "expected Galeed export file" >&2; exit 1; }
 test -s "$observer_out/trace-trace_demo-cairn-observations.jsonl" \
-  || { echo "expected Cairn observations file" >&2; exit 1; }
+  || { echo "expected Huldah observations file" >&2; exit 1; }
 test -s "$observer_out/trace-trace_demo-cairn-report.md" \
-  || { echo "expected Cairn report file" >&2; exit 1; }
+  || { echo "expected Huldah report file" >&2; exit 1; }
 test -s "$observer_out/trace-trace_demo-cairn-agent-harness.md" \
-  || { echo "expected Cairn agent harness file" >&2; exit 1; }
+  || { echo "expected Huldah agent harness file" >&2; exit 1; }
 
 echo "live_observer workflow command chain: pass"
 
 scheduled_out="$tmp/scheduled-observer"
-PATH="$tmp/bin:$PATH" MOCK_GALEED_ARGS="$tmp/galeed.args" MOCK_CAIRN_ARGS="$tmp/cairn.args" \
+PATH="$tmp/bin:$PATH" MOCK_GALEED_ARGS="$tmp/galeed.args" MOCK_HULDAH_ARGS="$tmp/huldah.args" \
   MOCK_HARNESS_ARGS="$tmp/harness.args" \
   NOA_OBSERVER_RUN_ID=20260708T120000Z \
   NOA_OBSERVER_SCHEDULED_OUT_DIR="$scheduled_out" \
@@ -341,7 +341,7 @@ PATH="$tmp/bin:$PATH" MOCK_GALEED_ARGS="$tmp/galeed.args" MOCK_CAIRN_ARGS="$tmp/
 
 grep -q -- "events --session sess_demo --limit 7 --json" "$tmp/galeed.args" \
   || { echo "expected scheduled observer session export args" >&2; exit 1; }
-grep -q -- "--title Scheduled Observer Test" "$tmp/cairn.args" \
+grep -q -- "--title Scheduled Observer Test" "$tmp/huldah.args" \
   || { echo "expected scheduled observer title" >&2; exit 1; }
 test -s "$scheduled_out/20260708T120000Z/session-sess_demo-cairn-report.md" \
   || { echo "expected scheduled observer timestamped report" >&2; exit 1; }
@@ -441,17 +441,24 @@ grep -q -- "--label cairn" "$tmp/gh.log" \
 
 echo "live_observer issue publish workflow: pass"
 
-rm -f "$tmp/bin/cairn-galeed-observe" "$tmp/cairn.args"
-PATH="$tmp/bin:$PATH" MOCK_GALEED_ARGS="$tmp/galeed.args" MOCK_CAIRN_ARGS="$tmp/cairn.args" \
+rm -f "$tmp/bin/huldah-galeed-observe" "$tmp/huldah.args"
+PATH="$tmp/bin:$PATH" MOCK_GALEED_ARGS="$tmp/galeed.args" MOCK_HULDAH_ARGS="$tmp/huldah.args" \
+  HULDAH_GALEED_OBSERVE="$tmp/bin/missing-huldah-observe" \
+  "$ROOT/workflows/live_observer.sh" --session sess_demo --out-dir "$observer_out/override" >/dev/null 2>&1 \
+  && { echo "expected invalid HULDAH_GALEED_OBSERVE override to fail" >&2; exit 1; }
+
+# The legacy CAIRN_* name is still honoured for one deprecation cycle, so an
+# operator's existing .env keeps working across the Deborah/Huldah split.
+PATH="$tmp/bin:$PATH" MOCK_GALEED_ARGS="$tmp/galeed.args" MOCK_HULDAH_ARGS="$tmp/huldah.args" \
   CAIRN_GALEED_OBSERVE="$tmp/bin/missing-cairn-observe" \
   "$ROOT/workflows/live_observer.sh" --session sess_demo --out-dir "$observer_out/override" >/dev/null 2>&1 \
-  && { echo "expected invalid CAIRN_GALEED_OBSERVE override to fail" >&2; exit 1; }
+  && { echo "expected legacy CAIRN_GALEED_OBSERVE override to still be honoured" >&2; exit 1; }
 
 echo "live_observer workflow invalid override: pass"
 
-cat > "$tmp/bin/cairn-galeed-observe" <<'SH'
+cat > "$tmp/bin/huldah-galeed-observe" <<'SH'
 #!/usr/bin/env bash
-printf '%s\n' "$*" > "$MOCK_CAIRN_ARGS"
+printf '%s\n' "$*" > "$MOCK_HULDAH_ARGS"
 input="$1"
 shift
 while [ "$#" -gt 0 ]; do
@@ -466,9 +473,9 @@ test -s "$input"
 printf '{"kind":"agent_output"}\n' > "$observations"
 printf '# %s\n' "$title" > "$report"
 SH
-chmod +x "$tmp/bin/cairn-galeed-observe"
+chmod +x "$tmp/bin/huldah-galeed-observe"
 
-if PATH="$tmp/bin:$PATH" MOCK_GALEED_ARGS="$tmp/galeed.args" MOCK_CAIRN_ARGS="$tmp/cairn.args" \
+if PATH="$tmp/bin:$PATH" MOCK_GALEED_ARGS="$tmp/galeed.args" MOCK_HULDAH_ARGS="$tmp/huldah.args" \
   MOCK_HARNESS_ARGS="$tmp/harness.args" \
   MOCK_GALEED_EMPTY=1 "$ROOT/workflows/live_observer.sh" --trace empty --out-dir "$observer_out/empty" \
   >/dev/null 2>"$tmp/empty.err"; then
@@ -477,7 +484,7 @@ if PATH="$tmp/bin:$PATH" MOCK_GALEED_ARGS="$tmp/galeed.args" MOCK_CAIRN_ARGS="$t
 fi
 grep -q 'Galeed export contains no events' "$tmp/empty.err" \
   || { echo "expected empty export diagnostic" >&2; exit 1; }
-PATH="$tmp/bin:$PATH" MOCK_GALEED_ARGS="$tmp/galeed.args" MOCK_CAIRN_ARGS="$tmp/cairn.args" \
+PATH="$tmp/bin:$PATH" MOCK_GALEED_ARGS="$tmp/galeed.args" MOCK_HULDAH_ARGS="$tmp/huldah.args" \
   MOCK_HARNESS_ARGS="$tmp/harness.args" \
   MOCK_GALEED_EMPTY=1 "$ROOT/workflows/live_observer.sh" --trace empty --allow-empty \
   --out-dir "$observer_out/empty-allowed" >/dev/null
@@ -538,31 +545,40 @@ cat > "$tmp/bin/hanani" <<'SH'
 #!/usr/bin/env bash
 echo "hanani 0.test"
 SH
-cat > "$tmp/bin/cairn-galeed-observe" <<'SH'
+cat > "$tmp/bin/huldah-galeed-observe" <<'SH'
 #!/usr/bin/env bash
 if [ "${1:-}" = "--help" ]; then
-  echo "usage: cairn-galeed-observe"
+  echo "usage: huldah-galeed-observe"
   exit 0
 fi
 exit 2
 SH
-cat > "$tmp/bin/cairn-agent-harness-plan" <<'SH'
+cat > "$tmp/bin/huldah-agent-harness-plan" <<'SH'
 #!/usr/bin/env bash
 if [ "${1:-}" = "--help" ]; then
-  echo "usage: cairn-agent-harness-plan"
+  echo "usage: huldah-agent-harness-plan"
+  exit 0
+fi
+exit 2
+SH
+cat > "$tmp/bin/deborah-validate" <<'SH'
+#!/usr/bin/env bash
+if [ "${1:-}" = "--help" ]; then
+  echo "usage: deborah-validate"
   exit 0
 fi
 exit 2
 SH
 chmod +x "$tmp/bin"/curl "$tmp/bin"/mongosh "$tmp/bin"/systemctl \
   "$tmp/bin"/mahalath "$tmp/bin"/tirzah "$tmp/bin"/hoglah "$tmp/bin"/milcah \
-  "$tmp/bin"/hanani "$tmp/bin"/galeed "$tmp/bin"/cairn-galeed-observe "$tmp/bin"/cairn-agent-harness-plan
+  "$tmp/bin"/hanani "$tmp/bin"/galeed "$tmp/bin"/huldah-galeed-observe "$tmp/bin"/huldah-agent-harness-plan \
+  "$tmp/bin"/deborah-validate
 
 health_out="$(PATH="$tmp/bin:$PATH" "$ROOT/health/healthcheck.sh")"
-printf '%s' "$health_out" | grep -q 'cairn-galeed-observe: usage: cairn-galeed-observe' \
-  || { echo "expected healthcheck to fall back to --help for cairn-galeed-observe" >&2; exit 1; }
-printf '%s' "$health_out" | grep -q 'cairn-agent-harness-plan: usage: cairn-agent-harness-plan' \
-  || { echo "expected healthcheck to fall back to --help for cairn-agent-harness-plan" >&2; exit 1; }
+printf '%s' "$health_out" | grep -q 'huldah-galeed-observe: usage: huldah-galeed-observe' \
+  || { echo "expected healthcheck to fall back to --help for huldah-galeed-observe" >&2; exit 1; }
+printf '%s' "$health_out" | grep -q 'huldah-agent-harness-plan: usage: huldah-agent-harness-plan' \
+  || { echo "expected healthcheck to fall back to --help for huldah-agent-harness-plan" >&2; exit 1; }
 
 echo "healthcheck CLI label fallback: pass"
 

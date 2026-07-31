@@ -85,11 +85,12 @@ pip_spec() {
   esac
 }
 
-# Family libraries: tool dependencies with no console apps that are NOT on
-# PyPI (and 'cairn' on PyPI is an unrelated project). They are --preinstall-ed
-# into each tool's venv from the lock, which both lets pip resolve them and
-# pins the right package instead of a PyPI name-collision.
-FAMILY_LIBS="galeed keturah cairn-lang"
+# Family libraries: tool dependencies that are NOT on PyPI. They are
+# --preinstall-ed into each tool's venv from the lock, which both lets pip
+# resolve them and pins the right package instead of a PyPI name-collision.
+# (deborah + huldah were one `cairn-lang` package until Deborah v0.9.0; the
+# split is why there are now two entries rather than one.)
+FAMILY_LIBS="galeed keturah deborah huldah"
 
 _is_family_lib() { case " $FAMILY_LIBS " in *" $1 "*) return 0 ;; *) return 1 ;; esac; }
 
@@ -112,15 +113,15 @@ build_family_wheelhouse() {
     info "wheel $tool $version  <-  $src"
     python3 -m pip wheel --no-deps --wheel-dir "$wheelhouse" "$spec" >/dev/null \
       || die "building wheel for $tool failed."
-    # Exact pin: 'cairn' on PyPI is an unrelated project whose versions can
-    # outrank ours in a find-links + index resolve (it shipped the WRONG
+    # Exact pin: a same-named project on PyPI can outrank ours in a
+    # find-links + index resolve (the retired `cairn` name shipped the WRONG
     # package once) — constraints force the family version, which only the
     # wheelhouse can satisfy.
     printf '%s==%s\n' "$tool" "$version" >> "$wheelhouse/family-constraints.txt"
   done < <(grep -vE '^\s*#|^\s*$' "$lock")
 
   [ "$family_count" -eq 0 ] || find "$wheelhouse" -maxdepth 1 -name '*.whl' -print -quit | grep -q . \
-    || warn "no family library wheels built — fresh installs may fail to resolve galeed/keturah/cairn."
+    || warn "no family library wheels built — fresh installs may fail to resolve galeed/keturah/deborah/huldah."
 }
 
 _wheelhouse_matches_lock() {
@@ -349,28 +350,41 @@ install_keturah_app() {
     || warn "keturah-mcp is not on PATH yet — restart your shell or run 'pipx ensurepath'."
 }
 
-# The view composer: cairn-lang is a family LIBRARY (preinstalled into tool
-# venvs), but it also ships console apps — `cairn-serve` (the interactive
-# transformation-view composer), plus `cairn-render` / `cairn-validate`. Install
-# it as a pipx APP with the web extra so those surfaces are on PATH out of the
-# box, the same way galeed doubles as the debugger app. The wheelhouse
-# find-links resolves the local cairn-lang + keturah wheels; the web extra
+# The view composer: deborah is a family LIBRARY (preinstalled into tool
+# venvs), but it also ships console apps — `deborah-serve` (the interactive
+# transformation-view composer), plus `deborah-render` / `deborah-validate`.
+# Install it as a pipx APP with the web extra so those surfaces are on PATH out
+# of the box, the same way galeed doubles as the debugger app. The wheelhouse
+# find-links resolves the local deborah + keturah wheels; the web extra
 # (fastapi, uvicorn) comes from PyPI.
-install_cairn_app() {
-  local root="$1" lock raw version spec wheelhouse
+install_deborah_app() {
+  _install_family_app "$1" deborah "[web]" "deborah-serve composer"
+}
+
+# The analysis CLIs: huldah ships the 14 `huldah-*` commands the live observer
+# and agent harness drive (huldah-galeed-observe, huldah-agent-harness-plan,
+# huldah-live-observe, the huldah-ui-* family). Installed as a pipx app so
+# health checks and workflows find them on PATH.
+install_huldah_app() {
+  _install_family_app "$1" huldah "" "huldah-* analysis CLIs"
+}
+
+# Shared body for the family packages that double as pipx apps.
+_install_family_app() {
+  local root="$1" tool="$2" extra="$3" label="$4" lock raw version spec wheelhouse
   local pip_arg pip_args=()
   lock="$(versions_lock "$root")"
-  raw="$(grep -E '^cairn-lang ' "$lock" | awk '{print $3}')"
-  version="$(grep -E '^cairn-lang ' "$lock" | awk '{print $2}')"
-  spec="$(pip_spec "cairn-lang" "[web]" "$raw")" \
-    || { warn "cairn-lang source missing — the cairn view composer will not be installed."; return 0; }
+  raw="$(grep -E "^${tool} " "$lock" | awk '{print $3}')"
+  version="$(grep -E "^${tool} " "$lock" | awk '{print $2}')"
+  spec="$(pip_spec "$tool" "$extra" "$raw")" \
+    || { warn "$tool source missing — $label will not be installed."; return 0; }
   wheelhouse="${NOA_BUILT_WHEELHOUSE:-${NOA_WHEELHOUSE:-$HOME/.cache/noa/wheelhouse}}"
   if pip_arg="$(_family_wheelhouse_pip_arg "$root" "$wheelhouse")"; then
     pip_args=(--pip-args "$pip_arg")
   fi
-  info "cairn-lang $version [web]  <-  $raw  (cairn-serve composer)"
+  info "$tool $version $extra  <-  $raw  ($label)"
   pipx install --force ${pip_args[@]+"${pip_args[@]}"} "$spec" >/dev/null \
-    || { warn "pipx install cairn-lang failed — the cairn view composer is unavailable."; return 0; }
+    || { warn "pipx install $tool failed — $label is unavailable."; return 0; }
 }
 
 # Serve the Mahlah UI from the installed Tirzah: build the front end (when the
@@ -515,7 +529,7 @@ restart_hoglah_worker() {
   start_hoglah_worker
 }
 
-# Native Linux: install a user timer that runs the Galeed -> Cairn live observer
+# Native Linux: install a user timer that runs the Galeed -> Huldah live observer
 # into timestamped report directories. WSL/no-systemd users can call the wrapper
 # manually or from cron.
 install_live_observer_timer() {

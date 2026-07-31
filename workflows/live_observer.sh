@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Export Galeed trace events and turn them into a Cairn live-observation report.
+# Export Galeed trace events and turn them into a Huldah live-observation report.
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
@@ -47,23 +47,26 @@ if [ -n "$TRACE_ID" ] && [ -n "$SESSION_ID" ]; then
 fi
 
 command -v galeed >/dev/null || { echo "galeed not on PATH - run install/install.sh first." >&2; exit 1; }
-CAIRN_GALEED_OBSERVE="${CAIRN_GALEED_OBSERVE:-}"
-if [ -z "$CAIRN_GALEED_OBSERVE" ]; then
-  if command -v cairn-galeed-observe >/dev/null; then
-    CAIRN_GALEED_OBSERVE="$(command -v cairn-galeed-observe)"
-  elif [ -x "$HOME/domains/Cairn/.venv/bin/cairn-galeed-observe" ]; then
-    CAIRN_GALEED_OBSERVE="$HOME/domains/Cairn/.venv/bin/cairn-galeed-observe"
+# The analysis CLIs moved from cairn-* to huldah-* in Deborah v0.9.0. The
+# legacy CAIRN_* overrides are still honoured for one cycle so an operator's
+# existing .env keeps working; console scripts themselves are not aliased.
+HULDAH_GALEED_OBSERVE="${HULDAH_GALEED_OBSERVE:-${CAIRN_GALEED_OBSERVE:-}}"
+if [ -z "$HULDAH_GALEED_OBSERVE" ]; then
+  if command -v huldah-galeed-observe >/dev/null; then
+    HULDAH_GALEED_OBSERVE="$(command -v huldah-galeed-observe)"
+  elif [ -x "$HOME/domains/Huldah/.venv/bin/huldah-galeed-observe" ]; then
+    HULDAH_GALEED_OBSERVE="$HOME/domains/Huldah/.venv/bin/huldah-galeed-observe"
   else
-    echo "cairn-galeed-observe not on PATH - run install/install.sh first." >&2
+    echo "huldah-galeed-observe not on PATH - run install/install.sh first." >&2
     exit 1
   fi
 fi
-CAIRN_AGENT_HARNESS_PLAN="${CAIRN_AGENT_HARNESS_PLAN:-}"
-if [ -z "$CAIRN_AGENT_HARNESS_PLAN" ]; then
-  if command -v cairn-agent-harness-plan >/dev/null; then
-    CAIRN_AGENT_HARNESS_PLAN="$(command -v cairn-agent-harness-plan)"
-  elif [ -x "$HOME/domains/Cairn/.venv/bin/cairn-agent-harness-plan" ]; then
-    CAIRN_AGENT_HARNESS_PLAN="$HOME/domains/Cairn/.venv/bin/cairn-agent-harness-plan"
+HULDAH_AGENT_HARNESS_PLAN="${HULDAH_AGENT_HARNESS_PLAN:-${CAIRN_AGENT_HARNESS_PLAN:-}}"
+if [ -z "$HULDAH_AGENT_HARNESS_PLAN" ]; then
+  if command -v huldah-agent-harness-plan >/dev/null; then
+    HULDAH_AGENT_HARNESS_PLAN="$(command -v huldah-agent-harness-plan)"
+  elif [ -x "$HOME/domains/Huldah/.venv/bin/huldah-agent-harness-plan" ]; then
+    HULDAH_AGENT_HARNESS_PLAN="$HOME/domains/Huldah/.venv/bin/huldah-agent-harness-plan"
   fi
 fi
 
@@ -83,6 +86,9 @@ fi
 
 safe_label="$(printf '%s' "$label" | tr -c 'A-Za-z0-9_.-' '_')"
 events_json="$OUT_DIR/${safe_label}-galeed-events.json"
+# Artifact names keep the "cairn" element deliberately: it names the
+# observation *format*, live_observer_index.py globs *-cairn-report.md, and
+# renaming would orphan every artifact already published.
 observations_jsonl="$OUT_DIR/${safe_label}-cairn-observations.jsonl"
 report_md="$OUT_DIR/${safe_label}-cairn-report.md"
 harness_md="$OUT_DIR/${safe_label}-cairn-agent-harness.md"
@@ -112,22 +118,22 @@ if [ "$event_count" -eq 0 ] && [ "$ALLOW_EMPTY" != "true" ]; then
   exit 3
 fi
 
-echo "==> 2/3  Analyse with Cairn"
-"$CAIRN_GALEED_OBSERVE" "$events_json" \
+echo "==> 2/3  Analyse with Huldah"
+"$HULDAH_GALEED_OBSERVE" "$events_json" \
   --title "$TITLE" \
   --observations-output "$observations_jsonl" \
   --output "$report_md"
 
-if [ -n "$CAIRN_AGENT_HARNESS_PLAN" ]; then
-  echo "==> 3/3  Generate Cairn agent harness guidance"
-  "$CAIRN_AGENT_HARNESS_PLAN" \
+if [ -n "$HULDAH_AGENT_HARNESS_PLAN" ]; then
+  echo "==> 3/3  Generate Huldah agent harness guidance"
+  "$HULDAH_AGENT_HARNESS_PLAN" \
     --repo "$ROOT" \
     --title "$TITLE agent harness" \
     --output-dir "$OUT_DIR" \
     --format markdown \
     --output "$harness_md"
 else
-  echo "cairn-agent-harness-plan not on PATH; skipping harness guidance artifact." >&2
+  echo "huldah-agent-harness-plan not on PATH; skipping harness guidance artifact." >&2
 fi
 
 echo "Galeed export:       $events_json"

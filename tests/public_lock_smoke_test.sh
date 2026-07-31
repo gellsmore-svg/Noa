@@ -25,13 +25,13 @@ done < <(grep -vE '^\s*#|^\s*$' "$LOCK")
 
 "$python" -m pip install --quiet "${requirements[@]}"
 "$python" -c '
-import cairn, galeed, hanani, hoglah, keturah, mahalath, milcah, tirzah
+import deborah, galeed, hanani, hoglah, huldah, keturah, mahalath, milcah, tirzah
 from hoglah import SessionPriorityQueue
 from hoglah.manifest import build_manifest
 print("public lock imports: pass")
 '
 
-for tool in mahalath tirzah hoglah milcah hanani galeed cairn-galeed-observe cairn-agent-harness-plan keturah-mcp; do
+for tool in mahalath tirzah hoglah milcah hanani galeed deborah-validate huldah-galeed-observe huldah-agent-harness-plan keturah-mcp; do
   "$bin/$tool" --help >/dev/null
 done
 

@@ -9,7 +9,8 @@ Public discussion: [Noa v0.1.1 public baseline](https://github.com/gellsmore-svg
 **Noa** is the orchestration sibling for the local AI stack: **Mahalath** (semantic
 precision), **Tirzah** (memory/retrieval), **Hoglah** (serialized LLM queue),
 **Milcah** (coherence engine), **Galeed** (trace/log spine), **Keturah**
-(capability manifest / MCP bridge), **Cairn** (process language), and **Hanani**
+(capability manifest / MCP bridge), **Deborah** (process language) with
+**Huldah** (human-systems analysis), and **Hanani**
 (evidence synthesis). It does **not** replace those projects — it *installs,
 configures, and runs them together* as a stable, production-like local
 environment, separate from any dev checkout or virtualenv.
@@ -46,9 +47,9 @@ environment, separate from any dev checkout or virtualenv.
   retrieval resolves against those terms.
 - `workflows/semantic_smoke.py` — the end-to-end seam proof (A/B; passes on live labels).
 - `workflows/codex_review_gate.py` — wraps `codex exec --json --output-schema`
-  with the Cairn/Milcah acceptance gate.
+  with the Deborah/Milcah acceptance gate.
 - `workflows/live_observer.sh` — exports Galeed trace events and produces a
-  Cairn live-observation report plus agent-harness guidance for human-load,
+  Huldah live-observation report plus agent-harness guidance for human-load,
   agent-effectiveness, HCI/cognitive-aesthetic follow-up, and runtime findings.
 - `workflows/live_observer_scheduled.sh` — runs the live observer into a
   timestamped report folder; `install.sh` enables it as a systemd user timer on
@@ -81,7 +82,7 @@ CI passes for readiness checks, installer/workflow tests, and the Codex
 review-gate workflow. GitHub Discussions are enabled for design/process
 conversation that does not belong in bug reports.
 
-The stack is Mahalath + Tirzah + Hoglah + Hanani + Galeed + Keturah + Cairn +
+The stack is Mahalath + Tirzah + Hoglah + Hanani + Galeed + Keturah + Deborah + Huldah +
 Milcah, with Noa providing installation, configuration, health checks, and
 observer workflows. The current reproducible fresh-machine lock is
 [`versions.git.lock`](versions.git.lock):
@@ -94,7 +95,8 @@ observer workflows. The current reproducible fresh-machine lock is
 | `galeed` | 0.2.0 | Trace/log spine |
 | `hanani` | 0.8.0 | Evidence synthesis |
 | `keturah` | 0.3.0 | Capability manifest / MCP bridge |
-| `cairn-lang` | 0.8.2 | Process language |
+| `deborah` | 0.9.0 | Process language |
+| `huldah` | 0.1.0 | Human-systems analysis |
 | `milcah` | 0.2.0 | Coherence engine |
 
 All eight siblings are **built and pinned** — none are deferred. Milcah's v0.2
@@ -105,7 +107,7 @@ core in particular is live, not planned.
 |---|---|---|
 | MongoDB | `127.0.0.1:27017` | `compose.yaml` (always-up) |
 | Ollama | `$OLLAMA_BASE_URL` (host, not containerised) | host service |
-| Cairn process views | `http://127.0.0.1:8795` | `cairn-serve` — compose views, save as templates |
+| Deborah process views | `http://127.0.0.1:8795` | `deborah-serve` — compose views, save as templates |
 | Galeed trace API | `http://127.0.0.1:8785` | `galeed serve` (needs `galeed[web]`); browse with Mizpah |
 | Hanani docs | `http://127.0.0.1:8805` | `hanani docs serve` |
 

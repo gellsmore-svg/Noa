@@ -3,7 +3,9 @@
 Noa is the runtime host for the family observer loop. It should not own the
 analysis language or the log spine:
 
-- Cairn owns the observation language and human/agent/system analysis.
+- Deborah owns the observation language; Huldah owns the human/agent/system
+  analysis. (They were one `cairn` package before Deborah v0.9.0 — the
+  observation *format* keeps the Cairn name.)
 - Galeed owns the durable trace/log spine and correlation ids.
 - Noa wires the running stack together and gives operators a workflow.
 
@@ -28,8 +30,8 @@ The workflow writes four files under `reports/live-observer/`:
 - the raw Galeed event export,
 - the Cairn observation JSONL,
 - the Cairn live-observation Markdown report.
-- a Cairn agent-harness Markdown plan that reminds consuming agents to use
-  deterministic Cairn tools, inspect HCI touchpoints, separate business work
+- a Huldah agent-harness Markdown plan that reminds consuming agents to use
+  deterministic Huldah tools, inspect HCI touchpoints, separate business work
   from interface overhead, assess cognitive aesthetic, and distinguish
   probability, impact, confidence, and evidence.
 

@@ -2,6 +2,25 @@
 
 ## [Unreleased]
 
+### Changed
+- **Migrated to the Cairn split.** `cairn-lang` became `deborah` (process
+  language) + `huldah` (human-systems analysis) at Deborah v0.9.0.
+  - `versions.lock` / `versions.git.lock` pin `deborah 0.9.0` and `huldah 0.1.0`
+    in place of `cairn-lang 0.8.2`; both are family libraries in `FAMILY_LIBS`.
+  - `install_cairn_app` split into `install_deborah_app` (the `deborah-serve`
+    composer, `[web]`) and `install_huldah_app` (the 14 `huldah-*` analysis
+    CLIs), over a shared `_install_family_app` helper.
+  - Healthcheck now probes `deborah-validate`, `huldah-galeed-observe` and
+    `huldah-agent-harness-plan`.
+  - The live-observer workflow calls `huldah-*` and resolves overrides from
+    `HULDAH_GALEED_OBSERVE` / `HULDAH_AGENT_HARNESS_PLAN`. The legacy `CAIRN_*`
+    variables are still honoured for one deprecation cycle so an existing `.env`
+    keeps working.
+  - Live-observer **artifact names are unchanged** (`*-cairn-report.md`,
+    `*-cairn-observations.jsonl`, `*-cairn-agent-harness.md`): they name the
+    observation format, `live_observer_index.py` globs them, and renaming would
+    orphan every artifact already published.
+
 ## [v0.1.18] - 2026-07-11
 
 - Extended the public Keturah MCP smoke to ingest a Hanani article and execute

@@ -47,7 +47,7 @@ already names both of their interfaces.
 - **Goal:** after `install.sh`, `keturah-mcp` is on PATH and Codex loads it (and,
   once Task A lands, the Galeed hooks).
 - **Do:** (1) add an `install_keturah_app` in `install/lib.sh` mirroring
-  `install_cairn_app`/`install_galeed_app` (pipx-install `keturah` so `keturah-mcp`
+  `install_deborah_app`/`install_galeed_app` (pipx-install `keturah` so `keturah-mcp`
   is on PATH; wheelhouse resolves it), called from install.sh/upgrade.sh; (2)
   extend `render_mcp_server_config` to write/merge a real `~/.codex/config.toml`
   `[mcp_servers.keturah]` (not just `.example`), and uncomment the `[hooks]`

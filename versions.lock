@@ -10,8 +10,11 @@ hoglah      0.8.0     ~/domains/Hoglah
 hanani      0.8.0     ~/domains/Hanani
 # Family libraries: dependencies of the tools, no console apps, and not on
 # PyPI — preinstalled into each tool's venv (never pipx-installed as apps).
-# NB the PyPI 'cairn' is an UNRELATED project — ours ships as cairn-lang (import: cairn).
+# `cairn` split into `deborah` (process language) + `huldah` (human-systems
+# analysis) at Deborah v0.9.0. The retired `cairn-lang` name now ships only a
+# deprecation shim, so nothing here should pin it.
 galeed      0.2.0     ~/domains/Galeed
 keturah     0.3.0     ~/domains/Keturah
-cairn-lang  0.8.2     ~/domains/Cairn
+deborah     0.9.0     ~/domains/Deborah
+huldah      0.1.0     ~/domains/Huldah
 milcah      0.2.0     ~/domains/Milcah

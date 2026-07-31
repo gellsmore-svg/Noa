@@ -71,7 +71,7 @@ def render_issue(finding: str, evidence: list[FindingEvidence]) -> str:
         "## Why This Matters",
         "",
         (
-            f"Cairn has observed `{finding}` across {len(evidence)} live-observer "
+            f"Huldah has observed `{finding}` across {len(evidence)} live-observer "
             f"report(s), covering {total_events} event(s). Highest observed risk: {highest}."
         ),
         "",

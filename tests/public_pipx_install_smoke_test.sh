@@ -25,11 +25,12 @@ install_keturah_app "$ROOT"
 inject_tirzah_into_keturah "$ROOT"
 inject_milcah_into_keturah "$ROOT"
 inject_hanani_into_keturah "$ROOT"
-install_cairn_app "$ROOT"
+install_deborah_app "$ROOT"
+install_huldah_app "$ROOT"
 inject_mahalath_into_tirzah "$ROOT"
 inject_hoglah_into_tirzah "$ROOT"
 
-for tool in mahalath tirzah hoglah milcah hanani galeed cairn-galeed-observe cairn-agent-harness-plan keturah-mcp; do
+for tool in mahalath tirzah hoglah milcah hanani galeed deborah-validate huldah-galeed-observe huldah-agent-harness-plan keturah-mcp; do
   "$PIPX_BIN_DIR/$tool" --help >/dev/null
 done
 
