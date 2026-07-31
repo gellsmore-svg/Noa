@@ -1,8 +1,34 @@
 # Design: split Cairn, and rename to Deborah (core) + Huldah (analysis)
 
-**Date:** 2026-07-09 · **Status:** approved roadmap, pre-execution · **Current
-decision:** Deborah=core process language, Huldah=human-systems analysis. Execute
-only after active Cairn work reaches a lull or behind a compatibility shim.
+**Date:** 2026-07-09 · **Status: EXECUTED 2026-07-31.** Shipped as
+[Deborah](https://github.com/gellsmore-svg/Deborah) `v0.9.0` (the Cairn repo,
+renamed — history preserved), [Huldah](https://github.com/gellsmore-svg/Huldah)
+`v0.1.0`, and the [cairn-lang](https://github.com/gellsmore-svg/cairn-lang)
+`v0.9.0` compatibility shim.
+
+> **Three corrections this document needed, found during execution:**
+>
+> 1. **`web.py`** — the doc suspected two web surfaces. There is one; it imports
+>    only `render` and is the core view composer, so it stayed in Deborah.
+> 2. **`manifest.py`** — absent from the module lists below, but it *fused both
+>    products*: 11 capabilities, 6 of them analysis. Split so each package
+>    advertises only what it can execute.
+> 3. **Extras** — docx/pdf were assigned to Huldah, but the exporters live in
+>    Deborah's `render/export.py`. Deborah keeps `[export]`; `huldah[export]`
+>    defers to it.
+>
+> Also: "cross-family ripple (the real cost)" overstated the code coupling.
+> There is exactly **one** Python import of cairn estate-wide, in a Tirzah test
+> (since migrated). The real ripple is Noa's shell and config, still pending.
+>
+> **The language keeps the Cairn name.** `.cairn.md` sources and ```cairn fences
+> are unchanged and the grammar is byte-identical to v0.8.2 — the rename fixed a
+> crowded namespace, not the language. Console scripts are deliberately *not*
+> shimmed: they run from shell and CI, where a silent alias hides the migration.
+>
+> **Noa is not yet migrated and does not need to be urgently** — its
+> `cairn-lang @ git+.../Cairn.git@v0.8.2` pin still resolves through GitHub's
+> redirect to the unchanged pre-split tag. Verified.
 
 ## Summary
 
