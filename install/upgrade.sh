@@ -40,6 +40,16 @@ else
     rm -rf "$BACKUP_DIR"
     die "Could not back up Mongo (no mongodump in the container or on the host). Re-run with --no-backup to proceed without one."
   fi
+  queue_dir="${HOGLAH_QUEUE_DIR:-$HOME/.hoglah}"
+  queue_dir="${queue_dir/#\~/$HOME}"
+  if [ -d "$queue_dir" ]; then
+    mkdir -p "$BACKUP_DIR/hoglah-queue"
+    cp -a "$queue_dir/." "$BACKUP_DIR/hoglah-queue/" \
+      || die "Could not back up Hoglah queue dir $queue_dir."
+    info "hoglah queue -> $BACKUP_DIR/hoglah-queue"
+  else
+    warn "Hoglah queue dir $queue_dir is absent — nothing to copy."
+  fi
   info "backup at $BACKUP_DIR"
 fi
 

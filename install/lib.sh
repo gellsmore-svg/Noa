@@ -109,7 +109,7 @@ build_family_wheelhouse() {
     _is_family_lib "$tool" || continue
     family_count=$((family_count + 1))
     spec="$(pip_spec "$tool" "" "$src")" \
-      || { warn "$tool: source '$src' missing — tools depending on it may not resolve."; continue; }
+      || die "$tool: source '$src' missing (lock $(versions_lock "$root"))."
     info "wheel $tool $version  <-  $src"
     python3 -m pip wheel --no-deps --wheel-dir "$wheelhouse" "$spec" >/dev/null \
       || die "building wheel for $tool failed."
@@ -171,7 +171,7 @@ install_pinned_tools() {
       milcah) extra="[mongo,web,hoglah,galeed]" ;;
     esac
     spec="$(pip_spec "$tool" "$extra" "$src")" \
-      || { warn "$tool: source '$src' missing — skipping."; continue; }
+      || die "$tool: source '$src' missing (lock $(versions_lock "$root"))."
     info "$tool $version  <-  $src"
     pipx install --force "${pip_args[@]}" "$spec" >/dev/null \
       || die "pipx install $tool failed."

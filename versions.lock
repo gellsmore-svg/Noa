@@ -4,17 +4,13 @@
 # installs should use versions.git.lock instead.
 #
 # tool      version   repo
-mahalath    1.1.0     ~/domains/Mahalath
-tirzah      1.12.0     ~/domains/Tirzah
-hoglah      0.9.0     ~/domains/Hoglah
-hanani      0.8.0     ~/domains/Hanani
-# Family libraries: dependencies of the tools, no console apps, and not on
-# PyPI — preinstalled into each tool's venv (never pipx-installed as apps).
-# `cairn` split into `deborah` (process language) + `huldah` (human-systems
-# analysis) at Deborah v0.9.0. The retired `cairn-lang` name now ships only a
-# deprecation shim, so nothing here should pin it.
-galeed      0.2.0     ~/domains/Galeed
-keturah     0.3.0     ~/domains/Keturah
-deborah     0.9.0     ~/domains/Deborah
+mahalath    1.6.0     ~/domains/Mahalath
+tirzah      1.16.2    ~/domains/Tirzah
+hoglah      0.11.0    ~/domains/Hoglah
+hanani      0.9.1     ~/domains/Hanani
+# Family libraries: exact pins via the wheelhouse (avoids PyPI name collisions).
+galeed      0.4.1     ~/domains/Galeed
+keturah     0.5.1     ~/domains/Keturah
+deborah     0.25.1    ~/domains/Deborah
 huldah      0.1.0     ~/domains/Huldah
-milcah      0.2.0     ~/domains/Milcah
+milcah      0.5.2     ~/domains/Milcah
