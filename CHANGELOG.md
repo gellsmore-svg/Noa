@@ -2,6 +2,9 @@
 
 ## [Unreleased]
 
+### Fixed
+- MongoDB is published on 127.0.0.1.
+
 ### Changed
 - **Migrated to the Cairn split.** `cairn-lang` became `deborah` (process
   language) + `huldah` (human-systems analysis) at Deborah v0.9.0.
